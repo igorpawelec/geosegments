@@ -1,0 +1,41 @@
+method,radius,iou_tuned_on_middle,iou_best_for_this_size,tuned_setting,best_setting_for_this_size
+prototype (k),1.6,0.1133,0.2633,14,3
+prototype (k),2.5,0.3583,0.5454,14,3
+prototype (k),4,0.7918,0.8044,14,6
+prototype (k),6,0.9494,0.9494,14,14
+prototype (k),9,0.9779,0.9795,14,17
+prototype (k),14,0.8835,0.9421,14,20
+prototype (k),20,0.8856,0.9857,14,20
+prototype (k),28,0.7447,0.9547,14,20
+prototype without smoothing (k),1.6,0.2217,0.2733,5,3
+prototype without smoothing (k),2.5,0.7903,0.8113,5,3
+prototype without smoothing (k),4,0.9422,0.9714,5,3
+prototype without smoothing (k),6,0.9709,0.9709,5,5
+prototype without smoothing (k),9,0.9858,0.9867,5,6
+prototype without smoothing (k),14,0.7989,0.9233,5,7
+prototype without smoothing (k),20,0.8567,0.955,5,6
+prototype without smoothing (k),28,0.7604,0.8875,5,7
+adaptels (T),1.6,0.0255,0.7394,64,15
+adaptels (T),2.5,0.3709,0.7447,64,22
+adaptels (T),4,0.7402,0.8101,64,45
+adaptels (T),6,0.8489,0.8489,64,64
+adaptels (T),9,0.6468,0.8257,64,128
+adaptels (T),14,0.361,0.819,64,180
+adaptels (T),20,0.2399,0.7821,64,256
+adaptels (T),28,0.1344,0.7982,64,360
+MRS 0.1/0.5 (scale),1.6,0.0068,0.82,32,8
+MRS 0.1/0.5 (scale),2.5,0.605,0.7911,32,16
+MRS 0.1/0.5 (scale),4,0.8281,0.8553,32,22
+MRS 0.1/0.5 (scale),6,0.8832,0.8832,32,32
+MRS 0.1/0.5 (scale),9,0.9316,0.9316,32,32
+MRS 0.1/0.5 (scale),14,0.8521,0.9437,32,64
+MRS 0.1/0.5 (scale),20,0.8191,0.963,32,64
+MRS 0.1/0.5 (scale),28,0.6366,0.971,32,90
+MRS 0.5/0.7 (scale),1.6,0.0673,0.6057,16,8
+MRS 0.5/0.7 (scale),2.5,0.7841,0.7979,16,8
+MRS 0.5/0.7 (scale),4,0.8801,0.8801,16,11
+MRS 0.5/0.7 (scale),6,0.8895,0.8895,16,16
+MRS 0.5/0.7 (scale),9,0.9329,0.9329,16,16
+MRS 0.5/0.7 (scale),14,0.8285,0.9501,16,45
+MRS 0.5/0.7 (scale),20,0.7655,0.9692,16,45
+MRS 0.5/0.7 (scale),28,0.4604,0.9709,16,45
