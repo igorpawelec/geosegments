@@ -1,5 +1,7 @@
 # GeoAdaptels + GeoPalette for QGIS
 
+<img src="geoadaptels_palette/icon.png" alt="GeoAdaptels + GeoPalette plugin icon: a Q around a hexagon divided into segments, three of them in the colours of the geopalette bands" align="right" width="96"/>
+
 [![qgis-tests](https://github.com/igorpawelec/geosegments/actions/workflows/qgis-tests.yml/badge.svg)](https://github.com/igorpawelec/geosegments/actions/workflows/qgis-tests.yml)
 [![Release](https://img.shields.io/github/v/tag/igorpawelec/geosegments?filter=qgis-v*&label=release)](https://github.com/igorpawelec/geosegments/releases)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
