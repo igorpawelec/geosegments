@@ -1,6 +1,6 @@
 # rgeoadaptels
 
-<img src="www/rgeoadaptels.png" alt="rgeoadaptels logo" align="right" width="200"/>
+<img src="../../logo/geosegments-mark.svg" alt="geosegments mark: a hexagon divided into segments, one of them highlighted" align="right" width="110"/>
 
 [![R-CMD-check](https://github.com/igorpawelec/geosegments/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/igorpawelec/geosegments/actions/workflows/R-CMD-check.yaml)
 [![Release](https://img.shields.io/github/v/tag/igorpawelec/geosegments?filter=rgeoadaptels-v*&label=release)](https://github.com/igorpawelec/geosegments/releases)

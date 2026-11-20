@@ -1,6 +1,6 @@
 # pygeoadaptels
 
-<img src="www/pygeoadaptels.png" align="right" width="200"/>
+<img src="../../logo/geosegments-mark.svg" alt="geosegments mark: a hexagon divided into segments, one of them highlighted" align="right" width="110"/>
 
 [![pygeoadaptels-tests](https://github.com/igorpawelec/geosegments/actions/workflows/pygeoadaptels-tests.yml/badge.svg)](https://github.com/igorpawelec/geosegments/actions/workflows/pygeoadaptels-tests.yml)
 [![Release](https://img.shields.io/github/v/tag/igorpawelec/geosegments?filter=pygeoadaptels-v*&label=release)](https://github.com/igorpawelec/geosegments/releases)
