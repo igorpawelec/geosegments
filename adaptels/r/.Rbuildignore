@@ -1,0 +1,13 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^\.github$
+^README\.md$
+^tools$
+^\.git.*$
+^cran-comments\.md$
+^CITATION\.cff$
+^LICENSE$
+^CONTRIBUTING\.md$
+^www$
+^docs$
+^test_data$
