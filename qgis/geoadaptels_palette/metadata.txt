@@ -1,0 +1,34 @@
+[general]
+name=GeoAdaptels + GeoPalette
+qgisMinimumVersion=3.28
+qgisMaximumVersion=4.99
+supportsQt6=True
+description=Colour-space conversion and seeded/adaptive superpixel segmentation for forestry orthophotos.
+version=0.5.5
+author=Igor Pawelec
+email=igor.pawelec@urk.edu.pl
+about=QGIS Processing provider wrapping the pygeoadaptels and pygeopalette Python packages: adaptels, SICLE, seeded region growing (grow_seeds), connectivity enforcement, vectorization, and 15 colour-space conversions. The algorithms stay in the packages; this plugin is glue. Both packages are bundled inside the plugin, so they need no download; numba, rasterio and fiona are installed into QGIS's Python on first run.
+icon=icon.png
+homepage=https://github.com/igorpawelec/qgis-geoadaptels-geopalette
+tracker=https://github.com/igorpawelec/qgis-geoadaptels-geopalette/issues
+repository=https://github.com/igorpawelec/qgis-geoadaptels-geopalette
+category=Analysis
+tags=raster,segmentation,superpixels,colour,forestry,remote sensing,orthophoto
+experimental=True
+deprecated=False
+changelog=0.5.5 -- no post-processor reads a raster any more: the label palette is built from the label count the algorithm already has and the colour-space stretch from band ranges measured in the worker, so the on_complete access violation a statistics pass on the GUI thread could trigger (0.2.1-0.5.4, found in GeoSnag) is gone; the binary dependencies install into the plugin's own libs/ folder instead of the user site, which every Python 3.12 on the machine reads (pip --user had broken a conda environment); a zip reinstall drops the previously imported vendored modules; the post-processor is no longer kept alive after QGIS took ownership of it.
+    0.5.4 -- declares qgisMaximumVersion 4.99 and supportsQt6, so QGIS 4 no longer lists the plugin as incompatible (designed for 3.28-3.99) at the next start; no code change.
+    0.5.3 -- bundles pygeoadaptels 0.10.4: grow_seeds(fill_holes=True) no longer takes hours on a large orthophoto (pocket census in O(pixels), bit-identical labels).
+    0.5.2 -- bundles pygeoadaptels 0.10.3: Enforce Connectivity with a minimum fragment size is about a hundred times faster (551 s to 5.4 s on a full-orthophoto window) with a bit-identical result.
+    0.5.1 -- band selection actually works: the packages were writing their output in the input format, so the VRT that carries a band selection made them fail. Bundles pygeoadaptels 0.10.2 and pygeopalette 0.7.1.
+    0.5.0 -- you choose which band is which. Colour conversion takes explicit red, green and blue band numbers instead of assuming 1/2/3, which was wrong for every CIR and NRGB raster; the segmentations take an optional band selection, empty meaning all. Bundles pygeoadaptels 0.10.1, which vectorises to GeoPackage about twelve times faster.
+    0.4.3 -- the compute kernels are compiled on the main thread before the run starts. Installing the plugin from a zip wipes numba's compiled cache, and recompiling it on the worker thread took QGIS down; the first run after an update now pauses briefly instead.
+    0.4.2 -- fixed a crash when styling the result of a large segmentation: the label-count check scanned every pixel on the GUI thread while the task was closing down. Styling now decides from the raster size, and never attaches itself to an output QGIS is not loading.
+    0.4.1 -- plugin icon in the Plugin Manager, provider named GeoAdaptels + GeoPalette, metadata points at the plugin's own repository.
+    0.4.0 -- renamed to match the renamed packages; packages bundled in the zip.
+    0.3.0 -- the two pure-Python packages ship inside the plugin: no git, no download for them.
+    0.2.2 -- label rasters get contrasting colours instead of an all-black palette.
+    0.2.1 -- fixed a phantom output that made QGIS report a missing layer.
+    0.2.0 -- styled results, advanced parameters collapsed, help with the dead-tree recipe.
+    0.1.1 -- dependency bootstrap resolves QGIS's real interpreter.
+    0.1.0 -- first release: six algorithms in the Processing toolbox.
