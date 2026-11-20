@@ -1,0 +1,44 @@
+cff-version: 1.2.0
+message: >-
+  If you use this software, please cite the method paper listed under
+  references and the part you used. Each released part carries its own
+  citation metadata with its version: adaptels/python/CITATION.cff for
+  pygeoadaptels, adaptels/r/CITATION.cff for rgeoadaptels and
+  qgis/CITATION.cff for the QGIS plugin. This file names the repository as a
+  whole.
+title: "geosegments: image segmentation for geospatial rasters with adaptive superpixels and seeded growing, in Python, R and QGIS"
+type: software
+license: GPL-3.0-or-later
+repository-code: "https://github.com/igorpawelec/geosegments"
+authors:
+  - family-names: Pawelec
+    given-names: Igor
+    affiliation: "University of Agriculture in Kraków, Poland"
+    email: igor.pawelec@urk.edu.pl
+    orcid: "https://orcid.org/0009-0005-9798-3596"
+keywords:
+  - image segmentation
+  - superpixels
+  - adaptels
+  - SICLE
+  - region growing
+  - orthophoto
+  - remote sensing
+  - QGIS
+references:
+  - type: article
+    title: "Evaluating superpixel algorithms for standing dead tree delineation using aerial orthoimagery"
+    authors:
+      - family-names: Pawelec
+        given-names: Igor
+      - family-names: Hawryło
+        given-names: Paweł
+      - family-names: Netzel
+        given-names: Paweł
+      - family-names: Socha
+        given-names: Jarosław
+    journal: "International Journal of Applied Earth Observation and Geoinformation"
+    volume: 147
+    start: 105180
+    year: 2026
+    doi: "10.1016/j.jag.2026.105180"
