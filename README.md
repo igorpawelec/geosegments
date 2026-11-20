@@ -7,6 +7,7 @@
 [![parity](https://github.com/igorpawelec/geosegments/actions/workflows/parity.yml/badge.svg)](https://github.com/igorpawelec/geosegments/actions/workflows/parity.yml)
 [![qgis-tests](https://github.com/igorpawelec/geosegments/actions/workflows/qgis-tests.yml/badge.svg)](https://github.com/igorpawelec/geosegments/actions/workflows/qgis-tests.yml)
 [![sigments-tests](https://github.com/igorpawelec/geosegments/actions/workflows/sigments-tests.yml/badge.svg)](https://github.com/igorpawelec/geosegments/actions/workflows/sigments-tests.yml)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 
 **Image segmentation algorithms for geospatial rasters: adaptive superpixels, seeded growing and a prototype with one dimensionless tolerance.**
 
@@ -21,7 +22,7 @@ A raster goes in; a segmentation comes out, as a label raster or as polygons. Th
 
 The two adaptels packages are bit-identical and are compared with each other whenever either changes ([parity workflow](.github/workflows/parity.yml)). The plugin carries `pygeoadaptels` from the same commit.
 
-**Authors:** Igor Pawelec, University of Agriculture in Kraków. **License:** GPL-3.0-or-later for `adaptels/` and `qgis/`; `sigments/` has no licence yet, see [Licence](#licence).
+**Authors:** Igor Pawelec, University of Agriculture in Kraków. **License:** GPL-3.0-or-later.
 
 ## The problem it solves
 
@@ -86,4 +87,4 @@ Each released part carries its own citation metadata: [adaptels/python/CITATION.
 
 ## Licence
 
-`adaptels/python`, `adaptels/r` and `qgis` are under the GNU General Public License v3.0 or later; each folder carries the text in its `LICENSE`. `sigments/` is research code for which no licence has been granted yet, see [sigments/LICENSE](sigments/LICENSE): it may be read here but not used or redistributed until a licence is chosen. Copyright Igor Pawelec, University of Agriculture in Kraków.
+GNU General Public License v3.0 or later, see [LICENSE](LICENSE); it covers every part of the repository, the sigments prototype included. Copyright Igor Pawelec, University of Agriculture in Kraków.

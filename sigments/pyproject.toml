@@ -9,7 +9,7 @@ description = "Sigma-regulated segments: image segmentation with one dimensionle
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [{ name = "Igor Pawelec" }]
-license = { text = "All rights reserved; a licence will be chosen before the repository is made public" }
+license = { text = "GPL-3.0-or-later" }
 dependencies = ["numpy", "numba", "scipy"]
 
 [project.optional-dependencies]

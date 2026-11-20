@@ -25,9 +25,8 @@
   gitignored.
 * Numbers quoted in `README.md` come from a named script in `bench/`; a number without its script does
   not go in. Report negative results as plainly as positive ones.
-* sigments has no licence yet (`LICENSE` in this folder; the adaptels packages and the plugin are
-  GPL-3.0-or-later). The `geosegments` repository is private for that reason: do not make it public or
-  publish the package without Igor's decision and a licence chosen for this folder. The name of the
-  method is a working name until the literature check listed in `README.md` is done.
+* sigments is under GPL-3.0-or-later, like the rest of the `geosegments` repository, which is public
+  (Igor's decision of 2026-11-20). It is still a research prototype: it has no release and no tag, and
+  the name of the method is a working name until the literature check listed in `README.md` is done.
 * Code, comments, commit messages and docs in English.
 * Authorship and agent scopes: `.claude/rules/` at the repository root.

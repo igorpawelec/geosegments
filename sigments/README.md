@@ -1,9 +1,9 @@
 # sigments: sigma-regulated segments
 
-Image segmentation with one dimensionless parameter. Research prototype, private.
+Image segmentation with one dimensionless parameter. Research prototype.
 
 **Author:** Igor Pawelec, University of Agriculture in Krakow (ORCID 0009-0005-9798-3596).
-Started 2026-11-19. **Licence:** none granted yet, see `LICENSE`.
+Started 2026-11-19. **Licence:** GPL-3.0-or-later, see `LICENSE`.
 
 ## The question
 
