@@ -78,7 +78,7 @@ class GrowSeedsAlgorithm(QgsProcessingAlgorithm):
             "points in one pixel is an error, not a silent merge.</p>")
 
     def helpUrl(self):
-        return "https://github.com/igorpawelec/pygeoadaptels/blob/main/docs/grow_seeds_guide.md"
+        return "https://github.com/igorpawelec/geosegments/blob/main/adaptels/python/docs/grow_seeds_guide.md"
 
     def initAlgorithm(self, config=None):
         self.addParameter(QgsProcessingParameterRasterLayer(

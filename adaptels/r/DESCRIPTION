@@ -20,7 +20,7 @@ License: GPL-3
 Encoding: UTF-8
 Depends: R (>= 3.6.0)
 Suggests: terra, sf
-URL: https://github.com/igorpawelec/rgeoadaptels
-BugReports: https://github.com/igorpawelec/rgeoadaptels/issues
+URL: https://github.com/igorpawelec/geosegments
+BugReports: https://github.com/igorpawelec/geosegments/issues
 RoxygenNote: 8.0.0
 NeedsCompilation: yes

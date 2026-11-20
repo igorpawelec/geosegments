@@ -57,9 +57,9 @@ connectivity = ["scipy>=1.7"]
 # See: pygeoadaptels.vectorize module.
 
 [project.urls]
-Homepage = "https://github.com/igorpawelec/pygeoadaptels"
-Repository = "https://github.com/igorpawelec/pygeoadaptels"
-Issues = "https://github.com/igorpawelec/pygeoadaptels/issues"
+Homepage = "https://github.com/igorpawelec/geosegments"
+Repository = "https://github.com/igorpawelec/geosegments"
+Issues = "https://github.com/igorpawelec/geosegments/issues"
 
 [project.scripts]
 pygeoadaptels = "pygeoadaptels.cli:main"

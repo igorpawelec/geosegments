@@ -2,7 +2,7 @@
 
 rgeoadaptels segments rasters into adaptels (Achanta 2018) and SICLE
 superpixels (Belém 2023). It is the R twin of
-[pygeoadaptels](https://github.com/igorpawelec/pygeoadaptels); the two are
+[pygeoadaptels](../python/), which lives in `adaptels/python` of this repository; the two are
 developed together and are meant to agree.
 
 Bug reports, ideas and pull requests are all welcome.
@@ -78,17 +78,16 @@ artefact of iteration order, so a renumbering reads as a 98 % difference when
 nothing moved. Match regions by best overlap first; this has produced a false
 alarm in this family three separate times.
 
-## The pinned twin
+## The twin in the same commit
 
-The agreement job installs pygeoadaptels from a **tag**, not the tip of its main
-branch — see `.github/workflows/R-CMD-check.yaml`. Unpinned, a commit in
-pygeoadaptels could turn this repository's CI red without anything changing here,
-and the failure would read as a defect in this package.
+The agreement job is `.github/workflows/parity.yml` at the repository root. It
+installs pygeoadaptels from `adaptels/python` of the commit under test and runs
+whenever either package changes, so a change to the Python kernel that the R
+port has not followed fails there, in the commit that made it.
 
-The cost is that the pin goes stale. When pygeoadaptels releases and the segmentation
-changes, bump the tag in the workflow and re-run the agreement job. A stale
-pin proves agreement against an old pygeoadaptels, which is quieter than a red
-build and therefore worse.
+Before the two packages shared a repository the job installed pygeoadaptels
+from a pinned **tag**. The pin went stale: it proved agreement against an old
+pygeoadaptels, which is quieter than a red build and therefore worse.
 
 ## Pull requests
 
@@ -133,13 +132,13 @@ was meant to do. The matrix is the part that disagrees.
    This is the step that was missing. Either open the Actions tab, or:
 
    ```bash
-   curl -s "https://api.github.com/repos/igorpawelec/rgeoadaptels/actions/runs?per_page=1" | python -c "import json,sys; r=json.load(sys.stdin)['workflow_runs'][0]; print(r['head_sha'][:7], r['status'], r['conclusion'])"
+   curl -s "https://api.github.com/repos/igorpawelec/geosegments/actions/runs?per_page=1" | python -c "import json,sys; r=json.load(sys.stdin)['workflow_runs'][0]; print(r['head_sha'][:7], r['status'], r['conclusion'])"
    ```
 
    `gh run list` is nicer if the GitHub CLI is installed; it is not
    everywhere, and the curl form needs nothing but a public repo.
 7. Only then tag and push the tag:
-   `git tag -a vX.Y.Z -m "..." && git push --tags`
+   `git tag -a rgeoadaptels-vX.Y.Z -m "..." && git push --tags` (tags carry the package name: `rgeoadaptels-v` here, `pygeoadaptels-v` for the Python twin)
 
 The order matters. A tag is what people install and what a DOI points at, so
 it should never be the thing that discovers a broken build. If Actions is

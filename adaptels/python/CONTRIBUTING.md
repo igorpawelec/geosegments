@@ -5,8 +5,8 @@ Contributions are welcome! Here's how to get started.
 ## Setup
 
 ```bash
-git clone https://github.com/igorpawelec/pygeoadaptels.git
-cd pygeoadaptels
+git clone https://github.com/igorpawelec/geosegments.git
+cd geosegments/adaptels/python
 conda env create -f environment.yaml
 conda activate pygeoadaptels
 pip install -e . --no-deps
@@ -63,13 +63,13 @@ change was meant to do. The matrix is the part that disagrees.
    `gh run list` is nicer if the GitHub CLI is installed; it is not
    everywhere, and the curl form needs nothing but a public repo.
 6. Only then tag and push the tag:
-   `git tag -a vX.Y.Z -m "..." && git push --tags`
-7. If this release changes what the package produces, bump the pin in
-   [rgeoadaptels](https://github.com/igorpawelec/rgeoadaptels)'s
-   `.github/workflows/R-CMD-check.yaml`, which installs `pygeoadaptels` from a tag.
-   Leaving it stale does not break anything visibly — the R twin goes on
-   proving its agreement against the previous release, which is exactly the
-   kind of quiet staleness this checklist exists to prevent.
+   `git tag -a pygeoadaptels-vX.Y.Z -m "..." && git push --tags` (tags carry the package name: `pygeoadaptels-v` here, `rgeoadaptels-v` for the R twin, `qgis-v` for the plugin)
+7. If this release changes what the package produces, the R twin in
+   [`adaptels/r`](../r/) has to follow in the same piece of work: `parity.yml`
+   compares the two packages from the same commit and fails on a single
+   differing pixel. There is no pinned tag to bump any more; before the two
+   packages shared a repository the R side proved its agreement against a
+   pinned release, and a stale pin went unnoticed.
 
 The order matters. A tag is what people install and what a DOI points at, so
 it should never be the thing that discovers a broken build. If Actions is

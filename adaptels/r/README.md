@@ -1,9 +1,9 @@
 # rgeoadaptels
 
-<img src="https://raw.githubusercontent.com/igorpawelec/rgeoadaptels/main/www/rgeoadaptels.png" alt="rgeoadaptels logo" align="right" width="200"/>
+<img src="www/rgeoadaptels.png" alt="rgeoadaptels logo" align="right" width="200"/>
 
-[![R-CMD-check](https://github.com/igorpawelec/rgeoadaptels/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/igorpawelec/rgeoadaptels/actions/workflows/R-CMD-check.yaml)
-[![Release](https://img.shields.io/github/v/release/igorpawelec/rgeoadaptels)](https://github.com/igorpawelec/rgeoadaptels/releases)
+[![R-CMD-check](https://github.com/igorpawelec/geosegments/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/igorpawelec/geosegments/actions/workflows/R-CMD-check.yaml)
+[![Release](https://img.shields.io/github/v/tag/igorpawelec/geosegments?filter=rgeoadaptels-v*&label=release)](https://github.com/igorpawelec/geosegments/releases)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 [![R](https://img.shields.io/badge/R-%3E%3D%203.6-blue.svg)](https://www.r-project.org)
 
@@ -11,7 +11,7 @@
 
 A raster goes in; a segmentation comes out, as a label matrix or a raster. R and plain C — no Rcpp, no required packages, and `terra` only if you want to read and write files.
 
-> **Python users:** the same algorithms are in [pygeoadaptels](https://github.com/igorpawelec/pygeoadaptels). The two are separate repositories because their tooling and idioms do not mix, but they are **bit-identical** — see [Agreement](#agreement-with-pygeoadaptels).
+> **Python users:** the same algorithms are in [pygeoadaptels](../python/). The two live side by side in this repository, in `adaptels/r` and `adaptels/python`, and are **bit-identical** — see [Agreement](#agreement-with-pygeoadaptels).
 
 ## The problem it solves
 
@@ -23,7 +23,7 @@ Object-based analysis of an orthophoto starts by cutting the image into segments
 
 Both run on one frozen kernel — an image foresting transform with a min-heap — which is also what **SICLE** uses when you do want a fixed number of superpixels.
 
-<img src="https://raw.githubusercontent.com/igorpawelec/rgeoadaptels/main/www/pipeline.png" alt="A 0.25 m orthophoto of a circular spruce plot with 36 dead-tree points; the same plot partitioned into 2,792 adaptels at threshold 60; and the crowns grown from the 36 points by grow_seeds" width="100%"/>
+<img src="www/pipeline.png" alt="A 0.25 m orthophoto of a circular spruce plot with 36 dead-tree points; the same plot partitioned into 2,792 adaptels at threshold 60; and the crowns grown from the 36 points by grow_seeds" width="100%"/>
 
 *A 100 × 100 m circular sample plot in a spruce stand at 0.25 m (`test_data/SNP_21_2020_1.tif`), with 36 standing dead trees digitised as points. Middle: the plot partitioned into 2,792 adaptels at the default threshold of 60 — median 1.8 m², largest 50 m². Right: the crowns `grow_seeds` grows from the 36 points on the CIELAB version of the same scene, with the dead-tree recipe (`max_cost` 15, `band_weights` 0.5/2.5/1, `max_radius` 20, `fill_holes`). The orthophoto is contrast-stretched for display only. Made by `www/figures.R`, from this package — and every number in these captions is the same as in pygeoadaptels' README, to the adaptel and the pixel.*
 
@@ -31,7 +31,7 @@ Both run on one frozen kernel — an image foresting transform with a min-heap �
 
 `threshold` is the colour distance a region may accumulate before it stops growing, in the units of the input bands. It is not a size and not a count: it decides the *scale* at which the scene is cut, and the scene then decides how many pieces that takes.
 
-<img src="https://raw.githubusercontent.com/igorpawelec/rgeoadaptels/main/www/threshold.png" alt="A 30 by 30 m window of the plot at threshold 30, 60 and 120: 825, 403 and 178 adaptels, small on the textured crowns and large in the shadow" width="100%"/>
+<img src="www/threshold.png" alt="A 30 by 30 m window of the plot at threshold 30, 60 and 120: 825, 403 and 178 adaptels, small on the textured crowns and large in the shadow" width="100%"/>
 
 *A 30 × 30 m window of the plot at threshold 30, 60 and 120 — 825, 403 and 178 adaptels in the window, 6,138, 2,792 and 1,159 on the whole plot. At every threshold the adaptels are small on the textured crowns and large in the homogeneous shadow between them; the threshold shifts that whole distribution rather than fixing a size.*
 
@@ -47,9 +47,9 @@ Passing 60 to `cosine` would merge the whole raster into one adaptel. It raises 
 
 ## The other way round: `grow_seeds`
 
-`grow_seeds` takes the points and one tolerance, `max_cost`: how far from the seed pixel's colour a crown may reach, in band units. Feed it CIELAB — convert with [rgeopalette](https://github.com/igorpawelec/rgeopalette) first — and `max_cost` becomes a ΔE, a colour difference with a meaning.
+`grow_seeds` takes the points and one tolerance, `max_cost`: how far from the seed pixel's colour a crown may reach, in band units. Feed it CIELAB — convert with [rgeopalette](https://github.com/igorpawelec/geopalette) first — and `max_cost` becomes a ΔE, a colour difference with a meaning.
 
-<img src="https://raw.githubusercontent.com/igorpawelec/rgeoadaptels/main/www/max_cost.png" alt="The 36 dead-tree points grown at max_cost 8, 15 and 25: crowns covering 1.9, 4.9 and 5.5 percent of the plot; at 25 one crown floods to a disc that max_radius stops" width="100%"/>
+<img src="www/max_cost.png" alt="The 36 dead-tree points grown at max_cost 8, 15 and 25: crowns covering 1.9, 4.9 and 5.5 percent of the plot; at 25 one crown floods to a disc that max_radius stops" width="100%"/>
 
 *The same 36 points grown at `max_cost` 8, 15 and 25: crowns covering 1.9 %, 4.9 % and 5.5 % of the plot, median 2.5, 6.4 and 6.5 m². At 8 the crowns stop short of their own edges; at 15, the recipe, they fill the bleached crowns and stop at the living neighbours; at 25 one seed on a dark stem leaks into the surrounding canopy until `max_radius` (20 px, 5 m) stops it — the disc in the lower left is that cap doing its job. Calibrate `max_cost` by sweeping it and looking, exactly like this.*
 
@@ -59,7 +59,7 @@ Passing 60 to `cosine` would merge the whole raster into one adaptel. It raises 
 
 Use adaptels when the segments are the units of a later analysis — zonal statistics, a classifier over segment features, a manual interpretation — and you want them to follow the scene rather than a grid. Use `grow_seeds` when the objects are already located and you need their boundaries. Use SICLE when a downstream method needs a fixed number of superpixels, or a saliency map (a normalised height model, say) should pull the boundaries towards objects.
 
-Adaptels are not object detection: a segment is a homogeneous patch, not a tree, and a crown may be several of them. For crowns from a canopy height model, use [rcacumen](https://github.com/igorpawelec/rcacumen).
+Adaptels are not object detection: a segment is a homogeneous patch, not a tree, and a crown may be several of them. For crowns from a canopy height model, use [rcacumen](https://github.com/igorpawelec/cacumen).
 
 ### The package family
 
@@ -67,18 +67,18 @@ rgeoadaptels is one step of a longer chain; the other steps are separate package
 
 | Step | R | Python |
 |---|---|---|
-| Colour-space conversion of orthophotos | [rgeopalette](https://github.com/igorpawelec/rgeopalette) | [pygeopalette](https://github.com/igorpawelec/pygeopalette) |
-| Adaptive superpixels and seeded growing on orthophotos | **rgeoadaptels** | [pygeoadaptels](https://github.com/igorpawelec/pygeoadaptels) |
-| Crowns from a canopy height model | [rcacumen](https://github.com/igorpawelec/rcacumen) | [pycacumen](https://github.com/igorpawelec/pycacumen) |
-| Standing dead trees on orthophotos | — | [pygeosnag](https://github.com/igorpawelec/pygeosnag) |
-| The same, inside QGIS | | [qgis-geoadaptels-geopalette](https://github.com/igorpawelec/qgis-geoadaptels-geopalette), [qgis-geosnag](https://github.com/igorpawelec/qgis-geosnag) |
-| Polish national geodata (GUGiK, BDL) | [rgeopl](https://github.com/igorpawelec/rgeopl) | — |
+| Colour-space conversion of orthophotos | [rgeopalette](https://github.com/igorpawelec/geopalette) | [pygeopalette](https://github.com/igorpawelec/geopalette) |
+| Adaptive superpixels and seeded growing on orthophotos | **rgeoadaptels** | [pygeoadaptels](../python/) |
+| Crowns from a canopy height model | [rcacumen](https://github.com/igorpawelec/cacumen) | [pycacumen](https://github.com/igorpawelec/cacumen) |
+| Standing dead trees on orthophotos | — | [pygeosnag](https://github.com/igorpawelec/geosnag) |
+| The same, inside QGIS | | [qgis-geoadaptels-geopalette](../../qgis/), [qgis-geosnag](https://github.com/igorpawelec/geosnag) |
+| Polish national geodata (GUGiK, BDL) | [rgeopl](https://github.com/igorpawelec/geopl) | — |
 
 ## Install
 
 ```r
 # install.packages("remotes")
-remotes::install_github("igorpawelec/rgeoadaptels")
+remotes::install_github("igorpawelec/geosegments", subdir = "adaptels/r")
 ```
 
 A C compiler is needed, which R already requires on Linux and macOS; on Windows install [Rtools](https://cran.r-project.org/bin/windows/Rtools/). `terra` is optional and only used to read and write rasters.
@@ -165,7 +165,7 @@ Three details make that possible, and all three are easy to get wrong:
 
 ## Citation
 
-Pawelec, I. (2026). *rgeoadaptels: Scale-Adaptive Superpixels for Geospatial Raster Data*. R package version 0.4.0. https://github.com/igorpawelec/rgeoadaptels
+Pawelec, I. (2026). *rgeoadaptels: Scale-Adaptive Superpixels for Geospatial Raster Data*. R package version 0.4.0. https://github.com/igorpawelec/geosegments
 
 Machine-readable metadata is in [`CITATION.cff`](CITATION.cff), including the papers the algorithms come from: Achanta et al. (2018) for adaptels and Belém et al. (2023) for SICLE. The original C implementation of adaptels, `plGeoAdaptels`, was written by Paweł Netzel at the University of Agriculture in Kraków.
 

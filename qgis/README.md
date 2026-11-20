@@ -1,32 +1,32 @@
 # GeoAdaptels + GeoPalette for QGIS
 
-[![tests](https://github.com/igorpawelec/qgis-geoadaptels-geopalette/actions/workflows/tests.yml/badge.svg)](https://github.com/igorpawelec/qgis-geoadaptels-geopalette/actions/workflows/tests.yml)
-[![Release](https://img.shields.io/github/v/release/igorpawelec/qgis-geoadaptels-geopalette)](https://github.com/igorpawelec/qgis-geoadaptels-geopalette/releases)
+[![qgis-tests](https://github.com/igorpawelec/geosegments/actions/workflows/qgis-tests.yml/badge.svg)](https://github.com/igorpawelec/geosegments/actions/workflows/qgis-tests.yml)
+[![Release](https://img.shields.io/github/v/tag/igorpawelec/geosegments?filter=qgis-v*&label=release)](https://github.com/igorpawelec/geosegments/releases)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 
 **Adaptive superpixels, seeded region growing and colour-space conversion for orthophotos, as Processing algorithms in QGIS.**
 
-<img src="https://raw.githubusercontent.com/igorpawelec/qgis-geoadaptels-geopalette/main/www/toolbox.png" alt="The Processing toolbox with the GeoAdaptels + GeoPalette provider expanded: Convert colour space under Colour; Adaptels, Enforce connectivity, Grow seeds and SICLE superpixels under Segmentation; Vectorize labels under Vector" align="right" width="330"/>
+<img src="www/toolbox.png" alt="The Processing toolbox with the GeoAdaptels + GeoPalette provider expanded: Convert colour space under Colour; Adaptels, Enforce connectivity, Grow seeds and SICLE superpixels under Segmentation; Vectorize labels under Vector" align="right" width="330"/>
 
-A QGIS **Processing provider** that exposes the user-facing functions of [pygeoadaptels](https://github.com/igorpawelec/pygeoadaptels) and [pygeopalette](https://github.com/igorpawelec/pygeopalette) as six algorithms: pick one in the toolbox, drop in layers, fill the parameters, run. The results come back as layers, styled so they can be read at once. No Python is written, and the same algorithms are available in batch mode and in the graphical modeller.
+A QGIS **Processing provider** that exposes the user-facing functions of [pygeoadaptels](../adaptels/python/) and [pygeopalette](https://github.com/igorpawelec/geopalette) as six algorithms: pick one in the toolbox, drop in layers, fill the parameters, run. The results come back as layers, styled so they can be read at once. No Python is written, and the same algorithms are available in batch mode and in the graphical modeller.
 
-**The plugin is glue.** The algorithms stay in the Python packages; this plugin turns a QGIS layer into a file path, calls the package's file-level function, and hands the output back to Processing. No segmentation or colour logic lives here, so it stays in step with the packages and with their R twins — [rgeoadaptels](https://github.com/igorpawelec/rgeoadaptels) is checked bit-identical to pygeoadaptels, so what QGIS draws is what R computes.
+**The plugin is glue.** The algorithms stay in the Python packages; this plugin turns a QGIS layer into a file path, calls the package's file-level function, and hands the output back to Processing. No segmentation or colour logic lives here, so it stays in step with the packages and with their R twins — [rgeoadaptels](../adaptels/r/) is checked bit-identical to pygeoadaptels, so what QGIS draws is what R computes.
 
 ## The worked example: standing dead trees
 
 An operator has digitised the standing dead trees of a plot as points and wants their crowns. Two algorithms do it. **Convert colour space** turns the RGB orthophoto into CIELAB, which is what makes the next step's tolerance meaningful — in CIELAB a distance of 1 is roughly one just-noticeable difference, so a `max_cost` reads as a ΔE. **Grow seeds** then grows every point into the region that looks like the pixel it sits on, within that tolerance, and everything unseeded stays unassigned: the operator supplies the objects, the algorithm supplies their boundaries.
 
-<img src="https://raw.githubusercontent.com/igorpawelec/qgis-geoadaptels-geopalette/main/www/grow_seeds.png" alt="The Grow seeds dialog filled with the CIELAB raster, the dead-tree point layer, max_cost 15, band_weights 0.5,2.5,1 and max_radius 20, beside the crowns it grows on a 30 by 30 m window of the plot, drawn as orange outlines over the orthophoto" width="100%"/>
+<img src="www/grow_seeds.png" alt="The Grow seeds dialog filled with the CIELAB raster, the dead-tree point layer, max_cost 15, band_weights 0.5,2.5,1 and max_radius 20, beside the crowns it grows on a 30 by 30 m window of the plot, drawn as orange outlines over the orthophoto" width="100%"/>
 
 *The Grow seeds dialog with the dead-tree recipe — `max_cost` 15, `band_weights` 0.5,2.5,1, `max_radius` 20, `fill_holes` on — and its result on a 30 × 30 m window of the test plot (`test_data/`, a spruce stand at 0.25 m with 36 digitised dead trees). This is the same run as in the pygeoadaptels README: all 36 points grow, the crowns cover 4.9 % of the plot, and they stop at the living neighbours. Made by `www/figures.py` inside QGIS 4.2.*
 
-The weights are the part that matters, and the reason is measurable: dead crowns sit at `a* ≈ +4`, healthy canopy at `a* ≈ -1`, and the gap is no larger than the brightness variation *inside* a single crown. Weighting `a*` up and `L*` down separates them — on this orthophoto it filled more (3544 → 6174 px) *and* spilled onto healthy trees less (19 % → 5 %) at the same time. `max_radius` is not optional: without it, past ΔE ≈ 25 one seed floods the scene. Full guidance is in [`docs/grow_seeds_guide.md`](https://github.com/igorpawelec/pygeoadaptels/blob/main/docs/grow_seeds_guide.md) in the package repository.
+The weights are the part that matters, and the reason is measurable: dead crowns sit at `a* ≈ +4`, healthy canopy at `a* ≈ -1`, and the gap is no larger than the brightness variation *inside* a single crown. Weighting `a*` up and `L*` down separates them — on this orthophoto it filled more (3544 → 6174 px) *and* spilled onto healthy trees less (19 % → 5 %) at the same time. `max_radius` is not optional: without it, past ΔE ≈ 25 one seed floods the scene. Full guidance is in [`docs/grow_seeds_guide.md`](../adaptels/python/docs/grow_seeds_guide.md) in the package repository.
 
 ## Adaptels, and the rest
 
 When no points exist and the whole scene has to be cut into segments, **Adaptels** does it with one parameter, a threshold in the units of the bands: regions grow until their internal distance passes it, so they come out small on textured crowns and large in homogeneous shadow, and the count follows the scene rather than a setting.
 
-<img src="https://raw.githubusercontent.com/igorpawelec/qgis-geoadaptels-geopalette/main/www/adaptels.png" alt="The Adaptels dialog with the orthophoto and threshold 60, beside the resulting label raster on the same 30 m window, every adaptel in a distinct colour" width="100%"/>
+<img src="www/adaptels.png" alt="The Adaptels dialog with the orthophoto and threshold 60, beside the resulting label raster on the same 30 m window, every adaptel in a distinct colour" width="100%"/>
 
 *The Adaptels dialog at the default threshold of 60 and its label raster on the same window, drawn the way the plugin styles it on load: a palette whose hues step by the golden angle, so consecutively numbered neighbours contrast instead of blending. 2,792 adaptels on the plot, 403 in this window — the same numbers as in the pygeoadaptels README, because it is the same function.*
 
@@ -43,7 +43,7 @@ When no points exist and the whole scene has to be cut into segments, **Adaptels
 
 ## Install
 
-1. Download `geoadaptels_palette-<version>.zip` from [Releases](https://github.com/igorpawelec/qgis-geoadaptels-geopalette/releases).
+1. Download `geoadaptels_palette-<version>.zip` from [Releases](https://github.com/igorpawelec/geosegments/releases).
 2. QGIS → **Plugins → Manage and Install Plugins → Install from ZIP**.
 3. Restart QGIS. The provider appears in the Processing toolbox as **GeoAdaptels + GeoPalette**.
 
@@ -55,18 +55,18 @@ The plugin runs on QGIS 3.40 and 3.44 (Qt 5) and on QGIS 4 (Qt 6); the figures a
 
 Use the plugin when the work happens in QGIS: an operator digitising and growing dead trees, a segmentation feeding a manual interpretation or zonal statistics, a colour conversion before either. The packages themselves are the better choice for anything scripted or batch-scale — the same functions, without the layer round-trip — and for the R side of the family.
 
-It does not delineate crowns from a canopy height model; that is [pycacumen](https://github.com/igorpawelec/pycacumen) / [rcacumen](https://github.com/igorpawelec/rcacumen), which work on height rather than colour. Standing dead trees *without* digitised points — detection rather than delineation — is [pygeosnag](https://github.com/igorpawelec/pygeosnag) and its plugin [qgis-geosnag](https://github.com/igorpawelec/qgis-geosnag), which run on adaptels underneath.
+It does not delineate crowns from a canopy height model; that is [pycacumen](https://github.com/igorpawelec/cacumen) / [rcacumen](https://github.com/igorpawelec/cacumen), which work on height rather than colour. Standing dead trees *without* digitised points — detection rather than delineation — is [pygeosnag](https://github.com/igorpawelec/geosnag) and its plugin [qgis-geosnag](https://github.com/igorpawelec/geosnag), which run on adaptels underneath.
 
 ### The package family
 
 | Step | Python | R |
 |---|---|---|
-| Colour-space conversion of orthophotos | [pygeopalette](https://github.com/igorpawelec/pygeopalette) | [rgeopalette](https://github.com/igorpawelec/rgeopalette) |
-| Adaptive superpixels and seeded growing on orthophotos | [pygeoadaptels](https://github.com/igorpawelec/pygeoadaptels) | [rgeoadaptels](https://github.com/igorpawelec/rgeoadaptels) |
-| Crowns from a canopy height model | [pycacumen](https://github.com/igorpawelec/pycacumen) | [rcacumen](https://github.com/igorpawelec/rcacumen) |
-| Standing dead trees on orthophotos | [pygeosnag](https://github.com/igorpawelec/pygeosnag) | — |
-| The same, inside QGIS | **qgis-geoadaptels-geopalette**, [qgis-geosnag](https://github.com/igorpawelec/qgis-geosnag) | |
-| Polish national geodata (GUGiK, BDL) | — | [rgeopl](https://github.com/igorpawelec/rgeopl) |
+| Colour-space conversion of orthophotos | [pygeopalette](https://github.com/igorpawelec/geopalette) | [rgeopalette](https://github.com/igorpawelec/geopalette) |
+| Adaptive superpixels and seeded growing on orthophotos | [pygeoadaptels](../adaptels/python/) | [rgeoadaptels](../adaptels/r/) |
+| Crowns from a canopy height model | [pycacumen](https://github.com/igorpawelec/cacumen) | [rcacumen](https://github.com/igorpawelec/cacumen) |
+| Standing dead trees on orthophotos | [pygeosnag](https://github.com/igorpawelec/geosnag) | — |
+| The same, inside QGIS | **qgis-geoadaptels-geopalette**, [qgis-geosnag](https://github.com/igorpawelec/geosnag) | |
+| Polish national geodata (GUGiK, BDL) | — | [rgeopl](https://github.com/igorpawelec/geopl) |
 
 ## Reference
 
