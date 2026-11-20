@@ -18,7 +18,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from rasterio.transform import rowcol
 import paths  # noqa: F401  puts the repository and its sibling packages on sys.path
-from paths import OUT, APPS
+from paths import OUT, ADAPTELS
 from sigments import segment
 from data import load
 import baselines as bl
@@ -129,7 +129,7 @@ fig.savefig(OUT + "gallery_scales.png", facecolor="white")
 plt.close(fig)
 
 # ---------------------------------------------------------------- SNP_21 (spruce, RGB)
-T = APPS + "pygeoadaptels/test_data/"
+T = ADAPTELS + "test_data/"
 with rasterio.open(T + "SNP_21_2020_1.tif") as src:
     d = src.read().astype(np.float64)
     tf = src.transform

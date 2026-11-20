@@ -1,0 +1,72 @@
+# R CMD check of the rgeoadaptels package in adaptels/r/, across the platforms
+# CRAN builds on. Runs only when that folder or this file changes. The check
+# that rgeoadaptels and pygeoadaptels produce identical segmentations is
+# parity.yml: it has to run when either package changes.
+#
+# The package compiles C, so the matrix is about compiler and R-version
+# drift as well as dependencies. oldrel-1 is here because DESCRIPTION
+# declares R (>= 3.6.0) and nothing else would catch a newer base function
+# slipping in.
+
+on:
+  push:
+    branches: [main]
+    paths: ["adaptels/r/**", ".github/workflows/R-CMD-check.yaml"]
+  pull_request:
+    paths: ["adaptels/r/**", ".github/workflows/R-CMD-check.yaml"]
+  workflow_dispatch:
+
+name: R-CMD-check
+
+permissions: read-all
+
+jobs:
+  R-CMD-check:
+    runs-on: ${{ matrix.config.os }}
+    name: ${{ matrix.config.os }} (${{ matrix.config.r }})
+
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - {os: macos-latest,   r: 'release'}
+          - {os: windows-latest, r: 'release'}
+          - {os: ubuntu-latest,  r: 'devel', http-user-agent: 'release'}
+          - {os: ubuntu-latest,  r: 'release'}
+          - {os: ubuntu-latest,  r: 'oldrel-1'}
+
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_KEEP_PKG_SOURCE: yes
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Without pandoc, `checking top-level files` NOTEs on README.md and
+      # NEWS.md, which the package does ship.
+      - uses: r-lib/actions/setup-pandoc@v2
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: ${{ matrix.config.r }}
+          http-user-agent: ${{ matrix.config.http-user-agent }}
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::rcmdcheck
+          needs: check
+          working-directory: adaptels/r
+
+      - uses: r-lib/actions/check-r-package@v2
+        with:
+          working-directory: adaptels/r
+          # --no-manual skips the PDF manual, which needs a LaTeX install.
+          # That is a real CRAN check and it is NOT covered here: run
+          # `R CMD check --as-cran` locally with LaTeX before submitting.
+          args: 'c("--no-manual", "--as-cran")'
+          build_args: 'c("--no-manual")'
+          # NOTEs do not fail: a first submission always NOTEs
+          # "New submission", and there is no way to satisfy it.
+          error-on: '"warning"'
+          upload-snapshots: true

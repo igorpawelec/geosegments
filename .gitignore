@@ -1,0 +1,13 @@
+# Per-package ignore rules live in adaptels/python/.gitignore,
+# adaptels/r/.gitignore, sigments/.gitignore and qgis/.gitignore.
+
+# Local Claude Code files
+CLAUDE.local.md
+.claude/settings.local.json
+.claude/worktrees/
+
+# OS and editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

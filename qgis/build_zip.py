@@ -12,16 +12,20 @@ import shutil
 import zipfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+REPO = os.path.dirname(HERE)             # the geosegments repository: adaptels/, sigments/, qgis/
+BESIDE = os.path.dirname(REPO)           # the folder that holds the checkouts
 PLUGIN = "geoadaptels_palette"
 SKIP_DIRS = {"__pycache__", "libs"}      # libs/ is what deps.py installs on the operator's machine, never shipped
 SKIP_EXT = {".pyc", ".pyo"}
 
 # Pure-Python packages copied into vendor/ at build time, so the plugin needs
 # neither git nor a download for them. Only .py is copied -- no bytecode, which
-# would be tied to one Python version and defeat the point.
+# would be tied to one Python version and defeat the point. pygeoadaptels
+# comes from adaptels/python/ of this repository, pygeopalette from python/ of
+# the geopalette checkout beside it.
 VENDOR_SRC = {
-    "pygeoadaptels": os.path.join(HERE, "..", "pygeoadaptels", "pygeoadaptels"),
-    "pygeopalette": os.path.join(HERE, "..", "pygeopalette", "pygeopalette"),
+    "pygeoadaptels": os.path.join(REPO, "adaptels", "python", "pygeoadaptels"),
+    "pygeopalette": os.path.join(BESIDE, "geopalette", "python", "pygeopalette"),
 }
 
 
@@ -44,7 +48,7 @@ def _pkg_version(pkg_dir):
 
 
 def vendor():
-    """Refresh vendor/ from the sibling package checkouts.
+    """Refresh vendor/ from adaptels/python/ and the geopalette checkout.
 
     Done at build time rather than kept in the tree, so the bundled copy can
     never quietly drift from the packages it was cut from. The versions are
@@ -60,8 +64,9 @@ def vendor():
         src = os.path.abspath(src)
         if not os.path.isdir(src):
             raise SystemExit(
-                f"Cannot vendor {name}: {src} not found. The build expects the "
-                f"package checkouts beside this repository.")
+                f"Cannot vendor {name}: {src} not found. The build expects "
+                f"pygeoadaptels in adaptels/python/ of this repository and the "
+                f"geopalette checkout beside the repository.")
         dest = os.path.join(dest_root, name)
         shutil.copytree(
             src, dest,

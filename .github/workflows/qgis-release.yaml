@@ -1,0 +1,62 @@
+# Build the installable plugin zip on every plugin version tag (qgis-vX.Y.Z)
+# and attach it to the release, so an operator downloads one file from
+# Releases and installs it.
+#
+# The build vendors two pure-Python packages: pygeoadaptels from
+# adaptels/python/ of the tagged commit, and pygeopalette from a checkout of
+# the geopalette repository *beside* this one, which is why that repository
+# is cloned first into the parent directory, at its default branch. Pin it
+# here if a release should be tied to a specific pygeopalette version.
+name: qgis-release
+
+on:
+  push:
+    tags:
+      - "qgis-v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out this repository (the plugin and pygeoadaptels)
+        uses: actions/checkout@v4
+        with:
+          path: geosegments
+
+      - name: Check out geopalette (pygeopalette is vendored into the zip)
+        uses: actions/checkout@v4
+        with:
+          repository: igorpawelec/geopalette
+          path: geopalette
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build the zip
+        working-directory: geosegments/qgis
+        run: python build_zip.py
+
+      - name: Check the zip really carries the vendored packages
+        working-directory: geosegments/qgis
+        run: |
+          python - <<'PY'
+          import glob, zipfile
+          z = sorted(glob.glob("dist/*.zip"))
+          assert z, "no zip was produced"
+          names = zipfile.ZipFile(z[-1]).namelist()
+          for pkg in ("pygeoadaptels", "pygeopalette"):
+              hit = [n for n in names if f"vendor/{pkg}/__init__.py" in n]
+              assert hit, f"{pkg} missing from vendor/ in {z[-1]}"
+          assert not [n for n in names if n.endswith(".pyc")], "bytecode in zip"
+          print(f"{z[-1]}: {len(names)} files, both packages vendored")
+          PY
+
+      - name: Attach the zip to the release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: geosegments/qgis/dist/*.zip
+          generate_release_notes: true
