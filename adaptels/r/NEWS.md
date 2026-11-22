@@ -1,6 +1,3 @@
-# rgeoadaptels 0.2.0
-
-
 # rgeoadaptels 0.4.0
 
 ## Changed
@@ -49,6 +46,8 @@
 * The cross-check now pins pygeoadaptels to `v0.9.0`, the release that adds
   `grow_seeds`.
 
+
+# rgeoadaptels 0.2.0
 
 * **`sicle()`** -- Superpixels through Iterative CLEarcutting. Oversample
   seeds, grow an optimum-path forest with the `fmax` path-cost and the
