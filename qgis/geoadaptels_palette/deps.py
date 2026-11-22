@@ -48,6 +48,7 @@ it fails (locked-down machines). Copyright (C) 2026 Igor Pawelec. Licence: GPLv3
 import importlib
 import importlib.util
 import os
+import shutil
 import subprocess
 import sys
 
@@ -64,6 +65,12 @@ REQUIRED = ["pygeoadaptels", "pygeopalette", "numba", "rasterio", "fiona"]
 # pygeoadaptels when that was pip-installed; now that pygeoadaptels is
 # vendored, pip is never told about it and would not install it otherwise.
 BINARY_DEPS = ["numba", "rasterio", "fiona"]
+
+# What pip drags into libs/ beside them although the interpreter has its own.
+# ``pip --target`` does not look at the interpreter's packages, so rasterio and
+# numba bring a numpy with them; libs/ is appended to ``sys.path``, so QGIS's
+# numpy is the one imported and the copy is 54 MB that nothing ever reads.
+SHADOWED = ("numpy",)
 
 
 def _numpy_major():
@@ -123,6 +130,66 @@ def missing_packages():
     return out
 
 
+def _same_or_under(path, root):
+    """True when ``path`` is ``root`` or lies inside it. Real paths are compared:
+    QGIS on Windows reports its prefix in the 8.3 short form (C:\\PROGRA~1\\...)."""
+    try:
+        p = os.path.normcase(os.path.realpath(path))
+        r = os.path.normcase(os.path.realpath(root))
+    except OSError:
+        return False
+    return p == r or p.startswith(r.rstrip("\\/") + os.sep)
+
+
+def _interpreter_roots():
+    return [r for r in {sys.prefix, sys.base_prefix, sys.exec_prefix} if r]
+
+
+def _origin(name):
+    """The file ``name`` is imported from, or would be, without importing it; None when not found."""
+    loaded = getattr(sys.modules.get(name), "__file__", None)
+    if loaded and os.path.isfile(loaded):
+        return loaded                             # find_spec trusts a loaded module's __spec__, which may be absent
+    try:
+        spec = importlib.util.find_spec(name)
+    except (ImportError, ValueError):
+        return None
+    origin = getattr(spec, "origin", None)
+    return origin if origin and os.path.isfile(origin) else None
+
+
+def prune_shadowed(feedback=None, names=SHADOWED):
+    """Remove from libs/ the copies of packages the interpreter provides itself.
+
+    A copy goes only when Python would import the package from the
+    interpreter's own folders, which come before libs/ on ``sys.path``: the
+    copy is then never the one in use, and removing it changes nothing but
+    the size of the folder. Returns the names removed. The same routine as in
+    the GeoSnag plugin.
+    """
+    removed = []
+    if not os.path.isdir(LIBS_DIR):
+        return removed
+    importlib.invalidate_caches()                 # a folder pip filled a moment ago is otherwise not seen
+    for name in names:
+        if not os.path.isdir(os.path.join(LIBS_DIR, name)):
+            continue
+        origin = _origin(name)
+        if origin is None or _same_or_under(origin, LIBS_DIR):
+            continue                              # the copy in libs/ is the one in use
+        if not any(_same_or_under(origin, root) for root in _interpreter_roots()):
+            continue                              # provided by something that can go away again
+        for entry in os.listdir(LIBS_DIR):
+            low = entry.lower()
+            if low in (name, name + ".libs") or (low.startswith(name + "-") and low.endswith(".dist-info")):
+                shutil.rmtree(os.path.join(LIBS_DIR, entry), ignore_errors=True)
+        removed.append(name)
+    if removed and feedback is not None:
+        feedback.pushInfo("Removed from the plugin's libs folder the copies of " + ", ".join(removed)
+                          + " that pip put there: QGIS has its own and those are the ones in use.")
+    return removed
+
+
 def _pip(py, specs, extra=()):
     os.makedirs(LIBS_DIR, exist_ok=True)
     cmd = [py, "-m", "pip", "install", "--target", LIBS_DIR, "--upgrade", *extra, *specs]
@@ -141,6 +208,7 @@ def ensure_dependencies(feedback=None, auto_install=True):
 
     missing = missing_packages()
     if not missing:
+        prune_shadowed(feedback)                  # what an earlier version of the plugin left there
         return True, []
     if not auto_install:
         return False, missing
@@ -188,6 +256,7 @@ def ensure_dependencies(feedback=None, auto_install=True):
         return False, missing
 
     importlib.invalidate_caches()
+    prune_shadowed(feedback)
     vendor_loader.activate()
     still = missing_packages()
     if still and feedback is not None:
