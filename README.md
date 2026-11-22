@@ -1,6 +1,4 @@
-<img src="logo/geosegments-mark.svg" align="right" width="110" alt="geosegments mark: a hexagon divided into segments, one of them highlighted"/>
-
-# geosegments
+<h1><img src="logo/geosegments.svg" alt="geosegments" height="96"/></h1>
 
 [![pygeoadaptels-tests](https://github.com/igorpawelec/geosegments/actions/workflows/pygeoadaptels-tests.yml/badge.svg)](https://github.com/igorpawelec/geosegments/actions/workflows/pygeoadaptels-tests.yml)
 [![R-CMD-check](https://github.com/igorpawelec/geosegments/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/igorpawelec/geosegments/actions/workflows/R-CMD-check.yaml)
