@@ -3,7 +3,7 @@
 Every function here takes plain paths and values and calls exactly one
 pygeoadaptels / pygeopalette entry point. **Nothing in this module imports
 qgis**, on purpose: it is the part that actually touches the packages, so it
-can be unit-tested outside QGIS (see ../test_package_calls.py). The QGIS
+can be unit-tested outside QGIS (see ../tests/test_core_calls.py). The QGIS
 algorithm classes in algorithms/ are thin wrappers that map dialog parameters
 onto these functions.
 
@@ -55,6 +55,7 @@ def band_subset(raster_path, bands, n_source_bands):
     # would resume the generator a second time when the caller's own block
     # raises, which swallows that exception behind a RuntimeError.
     vrt = None
+    path = None
     try:
         from osgeo import gdal
         gdal.UseExceptions()
@@ -63,9 +64,11 @@ def band_subset(raster_path, bands, n_source_bands):
         gdal.Translate(path, raster_path, bandList=want, format="VRT")
         vrt = path
     except Exception:
-        if vrt and os.path.exists(vrt):
+        # mkstemp has already made the file; a failed Translate (a band the
+        # raster does not have) used to leave it behind, empty.
+        if path and os.path.exists(path):
             try:
-                os.remove(vrt)
+                os.remove(path)
             except OSError:
                 pass
         vrt = None
@@ -149,9 +152,6 @@ def run_enforce_connectivity(raster_path, out_path, min_size=0):
     return n
 
 
-# ── vectorize ──────────────────────────────────────────────────────────
-
-def run_vectorize(raster_path, out_path, connectivity=8, compute_area=True,
 def label_nodata(nodata):
     """The nodata value Enforce connectivity declares for its output.
 
@@ -176,6 +176,9 @@ def label_nodata(nodata):
     return int(value)
 
 
+# ── vectorize ──────────────────────────────────────────────────────────
+
+def run_vectorize(raster_path, out_path, connectivity=8, compute_area=True,
                   driver=None):
     """Polygonise a label raster. Driver is inferred from the output extension
     when not given; grow/adaptels labels are 8-connected, so default to 8."""
