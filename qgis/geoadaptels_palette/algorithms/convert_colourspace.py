@@ -3,6 +3,7 @@ convert_raster through a temp-dir adapter (the package writes into a directory,
 not a single file)."""
 from qgis.core import (
     QgsProcessingAlgorithm,
+    QgsProcessingException,
     QgsProcessingParameterBand,
     QgsProcessingParameterEnum,
     QgsProcessingParameterRasterDestination,
@@ -10,7 +11,7 @@ from qgis.core import (
 )
 
 from .. import core, styling
-from ._base import band_hint, require_packages, warm_jit
+from ._base import band_hint, package_errors, require_packages, warm_jit
 
 
 class ConvertColourSpaceAlgorithm(QgsProcessingAlgorithm):
@@ -106,8 +107,15 @@ class ConvertColourSpaceAlgorithm(QgsProcessingAlgorithm):
                for k in (self.RED, self.GREEN, self.BLUE)]
         feedback.pushInfo(f"Converting to {space} from bands "
                           f"R={rgb[0]}, G={rgb[1]}, B={rgb[2]}")
+        missing = [b for b in rgb if b < 1 or b > n_bands]
+        if missing:
+            raise QgsProcessingException(
+                f"The raster has {n_bands} band(s), and the conversion was told to "
+                f"read band {', '.join(str(b) for b in missing)}. A colour space "
+                f"needs three bands: set the red, green and blue band numbers "
+                f"to bands the raster has.")
         band_hint(raster_path, rgb, feedback)
-        with core.band_subset(raster_path, rgb, n_bands) as src:
+        with package_errors(), core.band_subset(raster_path, rgb, n_bands) as src:
             core.run_convert_colourspace(src, space, out)
         try:                                   # measured here, in the worker, never in the post-processor
             ranges = styling.band_ranges(out)

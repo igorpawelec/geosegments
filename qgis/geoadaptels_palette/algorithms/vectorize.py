@@ -8,7 +8,7 @@ from qgis.core import (
 )
 
 from .. import core, styling
-from ._base import advanced, require_packages, warm_jit
+from ._base import advanced, package_errors, require_packages, warm_jit
 
 CONNECTIVITY = ["4", "8"]
 
@@ -73,10 +73,11 @@ class VectorizeAlgorithm(QgsProcessingAlgorithm):
         out = self.parameterAsOutputLayer(parameters, self.OUTPUT, context)
         conn = int(CONNECTIVITY[self.parameterAsEnum(
             parameters, self.CONNECTIVITY, context)])
-        n = core.run_vectorize(
-            raster_path, out, connectivity=conn,
-            compute_area=self.parameterAsBool(
-                parameters, self.COMPUTE_AREA, context))
+        with package_errors():
+            n = core.run_vectorize(
+                raster_path, out, connectivity=conn,
+                compute_area=self.parameterAsBool(
+                    parameters, self.COMPUTE_AREA, context))
         feedback.pushInfo(f"{n} polygons")
         styling.style_polygons(context, out)
         return {self.OUTPUT: out}

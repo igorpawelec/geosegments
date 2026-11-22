@@ -12,7 +12,7 @@ from qgis.core import (
 )
 
 from .. import core, styling
-from ._base import require_packages, warm_jit
+from ._base import package_errors, require_packages, warm_jit
 
 
 class EnforceConnectivityAlgorithm(QgsProcessingAlgorithm):
@@ -73,9 +73,10 @@ class EnforceConnectivityAlgorithm(QgsProcessingAlgorithm):
         raster_path = self.parameterAsRasterLayer(
             parameters, self.INPUT, context).source()
         out = self.parameterAsOutputLayer(parameters, self.OUTPUT, context)
-        n = core.run_enforce_connectivity(
-            raster_path, out,
-            min_size=self.parameterAsInt(parameters, self.MIN_SIZE, context))
+        with package_errors():
+            n = core.run_enforce_connectivity(
+                raster_path, out,
+                min_size=self.parameterAsInt(parameters, self.MIN_SIZE, context))
         feedback.pushInfo(f"{n} labels after enforcing connectivity")
         styling.style_label_raster(context, out, n)
         return {self.OUTPUT: out}

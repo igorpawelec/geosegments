@@ -8,7 +8,7 @@ from qgis.core import (
 )
 
 from .. import core, styling
-from ._base import advanced, require_packages, warm_jit
+from ._base import advanced, package_errors, require_packages, warm_jit
 
 
 class SicleAlgorithm(QgsProcessingAlgorithm):
@@ -100,7 +100,7 @@ class SicleAlgorithm(QgsProcessingAlgorithm):
         saliency_file = sal_layer.source() if sal_layer is not None else None
         feedback.pushInfo(
             f"Segmenting on bands {bands or list(range(1, n_bands + 1))}")
-        with core.band_subset(raster_path, bands, n_bands) as src:
+        with package_errors(), core.band_subset(raster_path, bands, n_bands) as src:
             n = core.run_sicle(
                 src, out,
                 n_segments=self.parameterAsInt(parameters, self.N_SEGMENTS, context),

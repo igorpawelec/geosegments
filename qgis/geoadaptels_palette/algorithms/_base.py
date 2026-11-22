@@ -1,11 +1,58 @@
 """Shared helpers for the algorithm classes: the dependency gate, the JIT
-warm-up, and the parameter-flag helper that keeps the dialogs from overwhelming
-an operator."""
+warm-up, the wrapper that turns a package's refusal into a message, and the
+parameter-flag helper that keeps the dialogs from overwhelming an operator."""
+import contextlib
+
 from qgis.core import QgsProcessingException
 
 from ..deps import ensure_dependencies, manual_hint
 
 _WARMED = False
+
+
+@contextlib.contextmanager
+def package_errors():
+    """Show what a package refused as its message, not as a Python traceback.
+
+    The packages validate their input and say what is wrong with it in the
+    exception text: a threshold on the wrong scale, two weights for three
+    bands, a seed point outside the raster, an output folder that does not
+    exist. Raised bare inside ``processAlgorithm`` that text reaches the
+    operator at the bottom of a traceback through this plugin's and the
+    package's source, which reads as the plugin having crashed.
+    ``QgsProcessingException`` is the error Processing prints as a message.
+
+    Converted: the exception types the packages use for bad input and
+    unusable files, and whatever rasterio and fiona raise of their own. The
+    traceback is not thrown away with that: it goes to the Log Messages panel
+    under the plugin's name, because some of those types are also what a
+    defect of the plugin would raise, and then it is the part that matters.
+    Anything else (a TypeError, a KeyError, numba failing to compile) is
+    left alone and arrives with its traceback, as a defect should.
+    """
+    try:
+        yield
+    except QgsProcessingException:
+        raise
+    except Exception as exc:
+        ours = isinstance(exc, (ValueError, OSError, IndexError, ImportError, RuntimeError))
+        theirs = type(exc).__module__.split(".")[0] in ("rasterio", "fiona")
+        if not (ours or theirs):
+            raise
+        _log_traceback()
+        text = str(exc).strip() or type(exc).__name__
+        raise QgsProcessingException(text) from exc
+
+
+def _log_traceback():
+    """The traceback of the exception being handled, to the Log Messages panel."""
+    try:
+        import traceback
+
+        from qgis.core import QgsMessageLog
+        QgsMessageLog.logMessage(traceback.format_exc(), "GeoAdaptels + GeoPalette")
+    except Exception:
+        pass
 
 
 def warm_jit(feedback=None):

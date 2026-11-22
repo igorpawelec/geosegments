@@ -10,7 +10,7 @@ from qgis.core import (
 )
 
 from .. import core, styling
-from ._base import advanced, require_packages, warm_jit
+from ._base import advanced, package_errors, require_packages, warm_jit
 
 DISTANCES = ["minkowski", "cosine", "angular"]
 
@@ -112,7 +112,7 @@ class AdaptelsAlgorithm(QgsProcessingAlgorithm):
             parameters, self.DISTANCE, context)]
         feedback.pushInfo(
             f"Segmenting on bands {bands or list(range(1, n_bands + 1))}")
-        with core.band_subset(raster_path, bands, n_bands) as src:
+        with package_errors(), core.band_subset(raster_path, bands, n_bands) as src:
             n = core.run_adaptels(
                 src, out,
                 threshold=self.parameterAsDouble(parameters, self.THRESHOLD, context),

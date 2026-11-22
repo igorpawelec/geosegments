@@ -16,7 +16,7 @@ from qgis.core import (
 )
 
 from .. import core, styling
-from ._base import advanced, require_packages, warm_jit
+from ._base import advanced, package_errors, require_packages, warm_jit
 
 
 class GrowSeedsAlgorithm(QgsProcessingAlgorithm):
@@ -167,9 +167,10 @@ class GrowSeedsAlgorithm(QgsProcessingAlgorithm):
         n_points = points_src.featureCount() if points_src is not None else -1
         n_points = int(n_points) if n_points and n_points > 0 else None
         feedback.pushInfo(f"grow_seeds parameters: {kwargs}")
-        core.run_grow_seeds(raster_path, points_path,
-                            out_labels=out_labels, out_polys=out_polys,
-                            **kwargs)
+        with package_errors():
+            core.run_grow_seeds(raster_path, points_path,
+                                out_labels=out_labels, out_polys=out_polys,
+                                **kwargs)
 
         # Cosmetic, and deliberately after the work: a styling failure must
         # never cost the operator a finished segmentation.
