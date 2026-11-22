@@ -480,8 +480,9 @@ def sicle_from_array(data, mask=None, n_segments=200,
     Returns
     -------
     labels : np.ndarray, shape (rows, cols), dtype int32
-        Superpixel labels (0-based). Every label is a single 8-connected
-        region. Do not pass these to enforce_connectivity(): it tests
+        Superpixel labels (0-based), -1 on nodata pixels. Every label is
+        a single 8-connected region. Do not pass these to
+        enforce_connectivity(): it tests
         4-connectivity, which is the adaptels grower's default
         neighbourhood, and it will split each SICLE superpixel into
         roughly twenty pieces that were never disconnected.
@@ -639,8 +640,12 @@ def create_sicle(input_files, output_file=None,
 
     # Write output
     if output_file is not None:
+        # nodata=-1, because that is the value the labels carry outside the
+        # mask. write_raster's default is -9999, the adaptels convention, and
+        # until 0.10.5 the file declared that while holding -1: a GIS drew
+        # the area outside the scene as a superpixel numbered minus one.
         write_raster(output_file, labels.ravel().astype(np.int32),
-                     meta, cols, rows)
+                     meta, cols, rows, nodata=-1)
         if not quiet:
             print(f"  Written: {output_file}")
 

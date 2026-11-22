@@ -192,6 +192,8 @@ Every connected component becomes its own adaptel, so the count rises by about 1
 <details>
 <summary><b>Performance, repository layout, requirements, testing</b></summary>
 
+Labels are 0-based and `-1` outside the mask; `create_sicle` writes that `-1` as the file's nodata value.
+
 First call includes Numba JIT compilation (~5 s). Subsequent calls run at near-C speed: a 400 × 400 px 3-band raster in 0.03 s (~2 800 adaptels), 2000 × 2000 px in about 1 s (~70 000).
 
 ```
