@@ -28,7 +28,7 @@ classifiers = [
 
 # Dependencies intentionally left empty.
 # In conda environments pip can break native libraries (GDAL, PROJ).
-# Install manually:  conda install -c conda-forge numpy numba rasterio fiona
+# Install manually:  conda install -c conda-forge numpy numba rasterio fiona scipy
 # What `import pygeoadaptels` actually needs, and nothing more. This was an
 # empty list until 0.5.1, paired with a README telling people to use
 # `pip install --no-deps` so that pip would not overwrite conda's

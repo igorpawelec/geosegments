@@ -187,7 +187,14 @@ def _fill_holes(labels2d, mask2d):
     crowns, and hours on a 150-megapixel orthophoto, where the pocket count
     and the raster grow together. Same result, bit for bit.
     """
-    from scipy import ndimage
+    try:
+        from scipy import ndimage
+    except ImportError as e:  # pragma: no cover
+        raise ImportError(
+            "fill_holes=True needs scipy.\n"
+            "  conda install -c conda-forge scipy\n"
+            "or pass fill_holes=False."
+        ) from e
     struct = np.array([[0, 1, 0], [1, 1, 1], [0, 1, 0]])
     out = labels2d.copy()
     fillable = (labels2d < 0) & (mask2d == 0)

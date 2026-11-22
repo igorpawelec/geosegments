@@ -80,11 +80,11 @@ pygeoadaptels is one step of a longer chain; the other steps are separate packag
 Native dependencies come from conda; pip then installs the package without touching them.
 
 ```bash
-conda install -c conda-forge numpy numba rasterio fiona
+conda install -c conda-forge numpy numba rasterio fiona scipy
 pip install --no-deps "git+https://github.com/igorpawelec/geosegments.git#subdirectory=adaptels/python"
 ```
 
-The `--no-deps` flag keeps pip from overwriting conda's GDAL/PROJ stack.
+The `--no-deps` flag keeps pip from overwriting conda's GDAL/PROJ stack. `rasterio` and `fiona` are for reading and writing files, `scipy` for `enforce_connectivity` and `fill_holes=True`; the array functions need only `numpy` and `numba`.
 
 ## Quick start
 
