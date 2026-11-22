@@ -10,8 +10,8 @@ authors:
     orcid: "https://orcid.org/0009-0005-9798-3596"
 repository-code: "https://github.com/igorpawelec/geosegments"
 license: GPL-3.0-or-later
-version: "0.10.4"
-date-released: "2026-09-21"
+version: "0.10.5"
+date-released: "2026-11-22"
 references:
   - type: article
     title: "Scale-Adaptive Superpixels"

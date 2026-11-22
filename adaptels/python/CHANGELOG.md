@@ -1,6 +1,61 @@
 # Changelog
 
 
+## [0.10.5] — 2026-11-22
+
+### Fixed
+- **The SICLE label raster declared a nodata value it did not hold.**
+  `create_sicle` wrote the labels, which carry -1 outside the mask, into a
+  file that declared -9999: `write_raster`'s default, and the adaptels
+  convention. No pixel of the file was nodata as far as a GIS could tell, so
+  on the test orthophoto the 34,386 pixels outside the plot were drawn,
+  counted and polygonised as a superpixel numbered minus one. The file now
+  declares -1, as the label raster of `grow_seeds_from_files` always has.
+  The labels themselves are unchanged.
+
+- **`area_m2` and `perimeter` of the vectorised polygons were not the
+  polygon's.** `area_m2` was the pixel count of the whole label, written on
+  every piece the label was left in, and `perimeter` was the circumference of
+  a circle of that area, `2 * sqrt(pi * area)`. On the test orthophoto 247 of
+  the 2,792 adaptels are in more than one piece, so the area attribute summed
+  to 8,580 m² over 7,851 m² of polygons; the first crown grown from the test
+  points with the README's recipe read 10.26 m of perimeter where its outline
+  is 16.50 m long. Both
+  are now measured on each polygon's own geometry, the perimeter along the
+  pixel edges and including the edges of holes, and the areas add up to the
+  labelled area. Written with four decimals instead of two, because one
+  0.25 m pixel is 0.0625 m². **This changes the values of both fields**; the
+  field names and the geometries are unchanged. `polygon_area_perimeter()`
+  is the function that measures them.
+
+- **`grow_seeds(fill_holes=True)` without scipy raised a bare
+  `ModuleNotFoundError`.** It now says what needs scipy and how to do without,
+  as `enforce_connectivity` already did. The README's install line names
+  scipy, which its own grow example needed.
+
+- The messages for a seed outside the raster or on nodata listed the points
+  as `[np.int64(2), np.int64(4)]` under numpy 2; they list `[2, 4]`.
+
+- **The README's multi-file example and `examples/quickstart.py` raised.**
+  Both passed a threshold on the 0-255 scale together with `normalize=True`,
+  which the package has refused since 0.3.0 because it would merge the whole
+  raster into one adaptel. They now use 0.25, on the normalised scale.
+
+### Changed
+- The README says which numbers come from the masked plot and which from the
+  bare array: 2,792 adaptels with the nodata outside the circular plot masked,
+  as `create_adaptels` does, and 2,770 when `adaptels_from_array` is handed
+  the array with its zeros. The threshold table names its window.
+- The timings in the README are the ones `examples/timing.py` prints: 0.07 s
+  for the 400 × 400 px raster and about 2 s for 2000 × 2000 px. The 0.03 s
+  and "about 1 s" quoted before came from no script in the repository.
+- `CITATION.cff` cited the original C implementation as "pygeoadaptels" at an
+  address that does not exist. It is `plGeoAdaptels`, by Paweł Netzel, at
+  https://gitlist.netzel.pl/, as the README has always said.
+- `environment.yaml` and `requirements.txt` list fiona and scipy, and no
+  longer geopandas and shapely, which the package does not use.
+
+
 ## [0.10.4] — 2026-09-07
 
 ### Fixed
