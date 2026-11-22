@@ -4,10 +4,10 @@ qgisMinimumVersion=3.28
 qgisMaximumVersion=4.99
 supportsQt6=True
 description=Colour-space conversion and seeded/adaptive superpixel segmentation for forestry orthophotos.
-version=0.5.7
+version=0.5.8
 author=Igor Pawelec
 email=igor.pawelec@urk.edu.pl
-about=QGIS Processing provider wrapping the pygeoadaptels and pygeopalette Python packages: adaptels, SICLE, seeded region growing (grow_seeds), connectivity enforcement, vectorization, and 15 colour-space conversions. The algorithms stay in the packages; this plugin is glue. Both packages are bundled inside the plugin, so they need no download; numba, rasterio and fiona are installed into QGIS's Python on first run.
+about=QGIS Processing provider wrapping the pygeoadaptels and pygeopalette Python packages: adaptels, SICLE, seeded region growing (grow_seeds), connectivity enforcement, vectorization, and 15 colour-space conversions. The algorithms stay in the packages; this plugin is glue. Both packages are bundled inside the plugin, so they need no download; numba, rasterio and fiona are installed into the plugin's own libs folder on first run.
 icon=icon.png
 homepage=https://github.com/igorpawelec/geosegments
 tracker=https://github.com/igorpawelec/geosegments/issues
@@ -15,8 +15,10 @@ repository=https://github.com/igorpawelec/geosegments
 category=Analysis
 tags=raster,segmentation,superpixels,colour,forestry,remote sensing,orthophoto
 experimental=True
+hasProcessingProvider=yes
 deprecated=False
-changelog=0.5.7 -- a new icon: a Q around the segments of the geosegments mark, three of them in the colours of the geopalette bands, drawn from a vector source. No change in the algorithms.
+changelog=0.5.8 -- results are styled again: on QGIS 4 the label palette, the crown outlines and the colour-space stretch were lost and every result loaded with QGIS's default style. A mistake in the input (a threshold on the wrong scale, a point outside the raster, a one-band raster for a colour space, an output folder that does not exist) is reported as a message, not as a Python traceback; the traceback goes to the Log Messages panel. The help texts are readable in dark themes. The Grow seeds dialog opens with max_cost 15 and max_radius 20; with both fields emptied every pixel is given to one of the points, and a script that leaves the two out is not affected. Enforce connectivity keeps a negative nodata value of its input (-1 from SICLE and Grow seeds) instead of declaring -9999 over it. Bundles pygeoadaptels 0.10.5: the SICLE raster declares the nodata value it holds (-1), and area_m2 and perimeter of the vectorised polygons are measured on each polygon, which changes their values. The copy of numpy that pip leaves in the plugin's libs folder, about 54 MB that QGIS never reads, is removed.
+    0.5.7 -- a new icon: a Q around the segments of the geosegments mark, three of them in the colours of the geopalette bands, drawn from a vector source. No change in the algorithms.
     0.5.6 -- the plugin lives in github.com/igorpawelec/geosegments, next to the pygeoadaptels package it bundles; the homepage, the tracker and the link to the grow seeds guide name the new address. No change in the algorithms.
     0.5.5 -- no post-processor reads a raster any more: the label palette is built from the label count the algorithm already has and the colour-space stretch from band ranges measured in the worker, so the on_complete access violation a statistics pass on the GUI thread could trigger (0.2.1-0.5.4, found in GeoSnag) is gone; the binary dependencies install into the plugin's own libs/ folder instead of the user site, which every Python 3.12 on the machine reads (pip --user had broken a conda environment); a zip reinstall drops the previously imported vendored modules; the post-processor is no longer kept alive after QGIS took ownership of it.
     0.5.4 -- declares qgisMaximumVersion 4.99 and supportsQt6, so QGIS 4 no longer lists the plugin as incompatible (designed for 3.28-3.99) at the next start; no code change.
