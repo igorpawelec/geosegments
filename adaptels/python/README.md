@@ -127,9 +127,9 @@ from pygeoadaptels.vectorize import vectorize_from_file
 n_poly = vectorize_from_file("adaptels.tif", "adaptels.gpkg")   # or .shp, .geojson; no geopandas needed
 ```
 
-From the command line:
 Each polygon carries `adaptel_id`, its own `area_m2` and its `perimeter`, measured on its geometry along the pixel edges. An adaptel left in several pieces (see *Contiguity* below) is several polygons with one id, each with the area of its piece.
 
+From the command line:
 
 ```bash
 pygeoadaptels -i input.tif -o output.tif -t 60.0
@@ -149,7 +149,7 @@ python -m pygeoadaptels --help
 | `queen_topology` | `False` | `True` = 8-connectivity, `False` = 4-connectivity |
 | `normalize` | `False` | Normalize inputs to [0, 1] before processing |
 
-Measured on `test_data/`, 200 × 200 px:
+Measured on the top-left 200 × 200 px of `test_data/SNP_21_2020_1.tif`, read as a plain array, so the zeros outside the circular plot count as data:
 
 | `threshold` | `minkowski` | | `threshold` | `angular` |
 |---|---|---|---|---|
@@ -158,7 +158,7 @@ Measured on `test_data/`, 200 × 200 px:
 | 60 | 700 | | 0.03 | 855 |
 | 120 | 299 | | 0.2 | 99 |
 
-**Contiguity.** Adaptels compete for pixels — a later adaptel takes a pixel from an earlier one whenever it reaches it with a smaller accumulated distance. That competition is what gives the method its boundary adherence, but it can also cut an earlier adaptel in two, leaving one label spread over separate patches. On the 400 × 400 px test raster at threshold 60, 265 of 2770 adaptels (9.6 %) come out in more than one piece, the worst in four. Harmless if the labels are only a lookup; not harmless for zonal statistics, which would average two separate patches into one "object":
+**Contiguity.** Adaptels compete for pixels — a later adaptel takes a pixel from an earlier one whenever it reaches it with a smaller accumulated distance. That competition is what gives the method its boundary adherence, but it can also cut an earlier adaptel in two, leaving one label spread over separate patches. On the 400 × 400 px test raster at threshold 60, read as a plain array, 265 of 2770 adaptels (9.6 %) come out in more than one piece, the worst in four. (`create_adaptels` on the file masks the nodata outside the circular plot, which `adaptels_from_array` on the bare array cannot know about: that is the 2,792 of the figures above, 247 of them split, 3,060 after `enforce_connectivity`.) Harmless if the labels are only a lookup; not harmless for zonal statistics, which would average two separate patches into one "object":
 
 ```python
 from pygeoadaptels import adaptels_from_array, enforce_connectivity
@@ -192,12 +192,12 @@ Every connected component becomes its own adaptel, so the count rises by about 1
 | `saliency` | `None` | Object saliency map (H, W) float64 in [0, 1], e.g. a normalised CHM |
 | `seeds` | `None` | Seeds given instead of sampled |
 
+Labels are 0-based and `-1` outside the mask; `create_sicle` writes that `-1` as the file's nodata value.
+
 <details>
 <summary><b>Performance, repository layout, requirements, testing</b></summary>
 
-Labels are 0-based and `-1` outside the mask; `create_sicle` writes that `-1` as the file's nodata value.
-
-First call includes Numba JIT compilation (~5 s). Subsequent calls run at near-C speed: a 400 × 400 px 3-band raster in 0.03 s (~2 800 adaptels), 2000 × 2000 px in about 1 s (~70 000).
+First call includes Numba JIT compilation (~5 s). Subsequent calls run at near-C speed: a 400 × 400 px 3-band raster in 0.07 s (~2 800 adaptels), 2000 × 2000 px in about 2 s (~70 000). `python examples/timing.py` measures both on your machine.
 
 ```
 pygeoadaptels/
