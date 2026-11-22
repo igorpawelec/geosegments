@@ -27,8 +27,8 @@ references:
     journal: "Color and Imaging Conference (CIC26)"
     year: 2018
   - type: software
-    title: "pygeoadaptels (original C implementation)"
+    title: "plGeoAdaptels (original C implementation)"
     authors:
       - family-names: Netzel
         given-names: Paweł
-    url: "https://github.com/pawelnetzel/plGeoAdaptels"
+    url: "https://gitlist.netzel.pl/"
