@@ -144,13 +144,38 @@ def run_enforce_connectivity(raster_path, out_path, min_size=0):
     layers, _mask, meta, cols, rows = read_raster(raster_path)
     labels = np.asarray(layers[0], dtype=np.int32).reshape(rows, cols)
     new_labels, n = enforce_connectivity(labels, min_size=min_size)
-    write_raster(out_path, new_labels, meta, cols, rows)
+    write_raster(out_path, new_labels, meta, cols, rows,
+                 nodata=label_nodata(meta.get("nodata")))
     return n
 
 
 # ── vectorize ──────────────────────────────────────────────────────────
 
 def run_vectorize(raster_path, out_path, connectivity=8, compute_area=True,
+def label_nodata(nodata):
+    """The nodata value Enforce connectivity declares for its output.
+
+    ``enforce_connectivity`` leaves every negative label where it is and
+    renumbers the rest. So a negative nodata value of the input is still what
+    those pixels hold afterwards, and the output has to declare it: -9999 from
+    Adaptels, -1 from SICLE and Grow seeds. Until 0.5.8 the output declared
+    -9999 whatever came in, and a SICLE or Grow seeds raster left this tool
+    with its -1 pixels no longer marked as nodata.
+
+    Anything else is not carried over, and -9999 is declared as before: a
+    nodata value of zero or more is a label to the package and its pixels are
+    renumbered, so the old number would hide a real region; NaN and values
+    outside int32 cannot be the nodata of an int32 raster at all.
+    """
+    try:
+        value = float(nodata)
+    except (TypeError, ValueError):
+        return -9999
+    if value != value or value >= 0 or value != int(value) or value < -2 ** 31:
+        return -9999
+    return int(value)
+
+
                   driver=None):
     """Polygonise a label raster. Driver is inferred from the output extension
     when not given; grow/adaptels labels are 8-connected, so default to 8."""
