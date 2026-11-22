@@ -211,3 +211,44 @@ def test_a_copy_shadowed_by_another_plugin_stays(libs, tmp_path, monkeypatch):
 
 def test_numpy_is_what_gets_pruned():
     assert deps.SHADOWED == ("numpy",)
+
+
+# -- a library's log record does not reach a root logger that cannot write ---------
+
+def test_library_records_stay_away_from_the_root_logger_during_a_run(capsys):
+    """What happens in a QGIS on Windows with a plugin that called
+    ``logging.basicConfig()`` at start-up: the root logger holds a stream
+    handler whose stream is None, and every record that reaches it makes
+    ``logging`` print "--- Logging error ---" with a traceback through the
+    code that was running, which was this plugin."""
+    import logging
+
+    root = logging.getLogger()
+    broken = logging.StreamHandler()
+    broken.stream = None                              # sys.stderr was None when the handler was made
+    root.addHandler(broken)
+    rasterio_env = logging.getLogger("rasterio._env")
+    before = logging.getLogger("rasterio").propagate
+    handlers = [list(logging.getLogger(n).handlers) for n in ("rasterio", "fiona")]   # rasterio adds a NullHandler on import
+    try:
+        with _base.package_errors():
+            rasterio_env.warning("%s in %s", "CPLE_AppDefined", "'Memory' driver is deprecated")
+            assert logging.getLogger("rasterio").propagate is False
+        inside = capsys.readouterr().err
+        assert logging.getLogger("rasterio").propagate is before
+        assert [list(logging.getLogger(n).handlers) for n in ("rasterio", "fiona")] == handlers
+        rasterio_env.warning("%s in %s", "CPLE_AppDefined", "the same record, outside a run")
+        outside = capsys.readouterr().err
+    finally:
+        root.removeHandler(broken)
+    assert "Logging error" not in inside
+    assert "Logging error" in outside                 # the test set-up does reproduce the fault
+
+
+def test_library_logging_is_put_back_when_the_run_fails():
+    import logging
+    before = [(logging.getLogger(n).propagate, list(logging.getLogger(n).handlers)) for n in ("rasterio", "fiona")]
+    with pytest.raises(QgsProcessingException):
+        with _base.package_errors():
+            raise ValueError("no")
+    assert [(logging.getLogger(n).propagate, list(logging.getLogger(n).handlers)) for n in ("rasterio", "fiona")] == before

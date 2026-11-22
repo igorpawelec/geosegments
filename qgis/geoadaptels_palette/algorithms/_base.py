@@ -2,6 +2,7 @@
 warm-up, the wrapper that turns a package's refusal into a message, and the
 parameter-flag helper that keeps the dialogs from overwhelming an operator."""
 import contextlib
+import logging
 
 from qgis.core import QgsProcessingException
 
@@ -31,7 +32,8 @@ def package_errors():
     left alone and arrives with its traceback, as a defect should.
     """
     try:
-        yield
+        with library_logs():
+            yield
     except QgsProcessingException:
         raise
     except Exception as exc:
@@ -42,6 +44,51 @@ def package_errors():
         _log_traceback()
         text = str(exc).strip() or type(exc).__name__
         raise QgsProcessingException(text) from exc
+
+
+class _ToMessageLog(logging.Handler):
+    """What a library logs, into the Log Messages panel under the plugin's name."""
+
+    def emit(self, record):
+        try:
+            from qgis.core import QgsMessageLog
+            QgsMessageLog.logMessage(f"{record.name}: {record.getMessage()}", "GeoAdaptels + GeoPalette")
+        except Exception:
+            pass
+
+
+@contextlib.contextmanager
+def library_logs(names=("rasterio", "fiona")):
+    """Keep what rasterio and fiona log during a run away from the root logger.
+
+    GDAL's warnings reach Python as log records of rasterio; one arrives with
+    the first polygonisation of every session ("'Memory' driver is deprecated
+    since GDAL 3.11"). The two libraries have no handler of their own, so the
+    record travels up to the root logger, and in a QGIS on Windows the root
+    logger may hold a handler that cannot write: a plugin that calls
+    ``logging.basicConfig()`` while QGIS starts gets a stream handler on
+    ``sys.stderr``, which is None at that moment and stays None in the handler.
+    Every record that reaches it raises inside ``logging``, which prints
+    "--- Logging error ---" and a traceback through this plugin's source into
+    the Python console. The run itself is fine; it reads as a crash.
+
+    For the length of a run the two loggers get a handler that writes to the
+    Log Messages panel and stop propagating. Both are put back afterwards, so
+    nothing changes for anything else that uses them.
+    """
+    handler = _ToMessageLog()
+    saved = []
+    for name in names:
+        logger = logging.getLogger(name)
+        saved.append((logger, logger.propagate))
+        logger.addHandler(handler)
+        logger.propagate = False
+    try:
+        yield
+    finally:
+        for logger, propagate in saved:
+            logger.removeHandler(handler)
+            logger.propagate = propagate
 
 
 def _log_traceback():
