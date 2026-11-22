@@ -40,7 +40,7 @@ data2 = np.zeros((1, 100, 100), dtype=np.float64)
 data2[0, :50, :] = 10.0
 data2[0, 50:, :] = 200.0
 labels2, n2 = adaptels_from_array(data2, threshold=30.0)
-print(f"Result: {n2} adaptels (expected: ~2)")
+print(f"Result: {n2} adaptels")
 
 #%% Test 3: With real GeoTIFF file
 print("=" * 60)
@@ -63,7 +63,10 @@ print("=" * 60)
 
 out4 = os.path.join(OUT, "adaptels_normalized.tif")
 
-labels4, n4 = create_adaptels(inp, out4, threshold=20.0, normalize=True)
+# NOTE the threshold. normalize=True rescales every band to [0, 1], so the
+# largest distance three bands can reach is sqrt(3) = 1.73 and a threshold on
+# the 0-255 scale would merge the whole raster. Passing one raises.
+labels4, n4 = create_adaptels(inp, out4, threshold=0.25, normalize=True)
 print(f"Result: {n4} adaptels")
 
 #%% Test 5: Different distance metrics

@@ -94,8 +94,9 @@ from pygeoadaptels import create_adaptels, adaptels_from_array
 # From GeoTIFF: reads, segments, writes the label raster
 labels, n = create_adaptels("input.tif", "adaptels.tif", threshold=60.0)
 
-# Several single-band files as one multi-band input
-labels, n = create_adaptels(["b1.tif", "b2.tif", "b3.tif"], "adaptels.tif", threshold=40.0, normalize=True)
+# Several single-band files as one multi-band input. normalize=True puts every
+# band in [0, 1], so the threshold is on that scale, not on the 0-255 one
+labels, n = create_adaptels(["b1.tif", "b2.tif", "b3.tif"], "adaptels.tif", threshold=0.25, normalize=True)
 
 # From numpy arrays, no file I/O: (bands, rows, cols) or (rows, cols)
 labels, n = adaptels_from_array(data, threshold=30.0)
