@@ -24,12 +24,19 @@ worker, where the algorithm already knows it -- the label count, the band
 ranges -- and handed to the post-processor as plain numbers. Found and fixed
 the same way in the GeoSnag plugin.
 
-Two QGIS traps besides that one: ``LayerDetails.setPostProcessor`` takes
-ownership of the processor (``sip.ispyowned`` goes False), so it is kept alive
-here only on bindings that do not; and ``layerToLoadOnCompletionDetails``
+Two QGIS traps besides that one. ``LayerDetails.setPostProcessor`` takes
+ownership of the C++ half of the processor (``sip.ispyowned`` goes False) but
+keeps nothing of the Python half: once the last Python reference is dropped
+the subclass is gone, QGIS is left holding the bare interface, and its
+``postProcessLayer`` does nothing. From 0.5.5 to 0.5.7 the processor was kept
+alive only when the bindings had *not* taken ownership, which on QGIS 4.2 is
+never, so every result loaded unstyled and nothing said so. A reference is
+now always kept (``_KEEP_ALIVE``). And ``layerToLoadOnCompletionDetails``
 inserts a default entry for an unknown id, so ``willLoadLayerOnCompletion`` is
 asked first. Copyright (C) 2026 Igor Pawelec. Licence: GPLv3.
 """
+import collections
+
 from qgis.core import (
     QgsFillSymbol,
     QgsPalettedRasterRenderer,
@@ -40,8 +47,14 @@ from qgis.core import (
 # very long class list, so those keep QGIS's default renderer.
 MAX_PALETTE_CLASSES = 20000
 
-# Only for a QGIS whose bindings do not take ownership; emptied on each run.
-_KEEP_ALIVE = []
+# The Python halves of the processors handed to QGIS. Without a reference here
+# they are collected as soon as the algorithm returns and the layer loads
+# unstyled. Bounded rather than cleared per run: one run registers up to two
+# (label raster and polygons), and a batch run may register those of every
+# row before any layer is loaded, so the bound is far above any batch. A
+# processor is a few numbers; holding one past the life of its C++ half is
+# harmless, nothing calls it again.
+_KEEP_ALIVE = collections.deque(maxlen=4096)
 
 
 def _usable(layer):
@@ -78,8 +91,8 @@ class LabelRasterPostProcessor(QgsProcessingLayerPostProcessorInterface):
     The count comes from the algorithm -- every package function returns it,
     and for grow_seeds it is the number of points -- so the classes are built
     from an integer and the raster is never read here. Nodata (-1 for
-    grow_seeds, -9999 elsewhere) is declared in the GeoTIFF, so QGIS already
-    renders it transparent.
+    grow_seeds and SICLE, -9999 for adaptels) is declared in the GeoTIFF, so
+    QGIS already renders it transparent.
     """
 
     def __init__(self, n_labels):
@@ -201,15 +214,6 @@ def band_ranges(path, lo=2.0, hi=98.0, max_px=4_000_000):
     return out
 
 
-def _still_ours(processor):
-    """True when Python, not C++, owns the processor after the hand-over."""
-    try:
-        from qgis.PyQt import sip
-        return bool(sip.ispyowned(processor))
-    except Exception:
-        return True                              # cannot tell: keep it, as before
-
-
 def _register(context, dest_id, processor):
     """Attach `processor` to the layer already resolved as `dest_id`.
 
@@ -235,10 +239,8 @@ def _register(context, dest_id, processor):
         details = context.layerToLoadOnCompletionDetails(dest_id)
         if details is None:
             return False
-        del _KEEP_ALIVE[:]                       # last run's, if any
         details.setPostProcessor(processor)
-        if _still_ours(processor):               # bindings without /Transfer/
-            _KEEP_ALIVE.append(processor)
+        _KEEP_ALIVE.append(processor)            # or QGIS calls an interface with no Python behind it
         return True
     except Exception:
         # Not loading on completion, or an API shape this QGIS does not have.
