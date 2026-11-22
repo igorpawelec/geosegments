@@ -49,7 +49,7 @@ When no points exist and the whole scene has to be cut into segments, **Adaptels
 2. QGIS → **Plugins → Manage and Install Plugins → Install from ZIP**.
 3. Restart QGIS. The provider appears in the Processing toolbox as **GeoAdaptels + GeoPalette**.
 
-`pygeoadaptels` and `pygeopalette` are **bundled inside the zip** — they are pure Python, so no download and no `git` is needed for them. Three compiled dependencies are not bundled and cannot be: `numba`, `rasterio` and `fiona`. The first algorithm run installs them into QGIS's own Python; if that fails on a locked-down machine, the Processing log prints the exact command to run by hand.
+`pygeoadaptels` and `pygeopalette` are **bundled inside the zip** — they are pure Python, so no download and no `git` is needed for them. Three compiled dependencies are not bundled and cannot be: `numba`, `rasterio` and `fiona`. The first algorithm run installs them into the plugin's own `libs` folder, which only this plugin reads; if that fails on a locked-down machine, the Processing log prints the exact command to run by hand.
 
 The plugin runs on QGIS 3.40 and 3.44 (Qt 5) and on QGIS 4 (Qt 6); the figures above were made in 4.2.2. Upgrading from a version before 0.4.0? **Uninstall the old plugin first** — it had a different internal id (`geopalette_adaptels`), so QGIS treats this as a separate plugin and you would end up with two sets of algorithms in the toolbox.
 
@@ -57,7 +57,7 @@ The plugin runs on QGIS 3.40 and 3.44 (Qt 5) and on QGIS 4 (Qt 6); the figures a
 
 Use the plugin when the work happens in QGIS: an operator digitising and growing dead trees, a segmentation feeding a manual interpretation or zonal statistics, a colour conversion before either. The packages themselves are the better choice for anything scripted or batch-scale — the same functions, without the layer round-trip — and for the R side of the family.
 
-It does not delineate crowns from a canopy height model; that is [pycacumen](https://github.com/igorpawelec/cacumen) / [rcacumen](https://github.com/igorpawelec/cacumen), which work on height rather than colour. Standing dead trees *without* digitised points — detection rather than delineation — is [pygeosnag](https://github.com/igorpawelec/geosnag) and its plugin [qgis-geosnag](https://github.com/igorpawelec/geosnag), which run on adaptels underneath.
+It does not delineate crowns from a canopy height model; that is [pycacumen](https://github.com/igorpawelec/cacumen) / [rcacumen](https://github.com/igorpawelec/cacumen), which work on height rather than colour. Standing dead trees *without* digitised points — detection rather than delineation — is [pygeosnag](https://github.com/igorpawelec/geosnag) and its plugin [GeoSnag](https://github.com/igorpawelec/geosnag), which run on adaptels underneath.
 
 ### The package family
 
@@ -67,7 +67,7 @@ It does not delineate crowns from a canopy height model; that is [pycacumen](htt
 | Adaptive superpixels and seeded growing on orthophotos | [pygeoadaptels](../adaptels/python/) | [rgeoadaptels](../adaptels/r/) |
 | Crowns from a canopy height model | [pycacumen](https://github.com/igorpawelec/cacumen) | [rcacumen](https://github.com/igorpawelec/cacumen) |
 | Standing dead trees on orthophotos | [pygeosnag](https://github.com/igorpawelec/geosnag) | — |
-| The same, inside QGIS | **qgis-geoadaptels-geopalette**, [qgis-geosnag](https://github.com/igorpawelec/geosnag) | |
+| The same, inside QGIS | **this plugin**, [GeoSnag](https://github.com/igorpawelec/geosnag) | |
 | Polish national geodata (GUGiK, BDL) | — | [rgeopl](https://github.com/igorpawelec/geopl) |
 
 ## Reference
@@ -75,35 +75,34 @@ It does not delineate crowns from a canopy height model; that is [pycacumen](htt
 <details>
 <summary><b>Build from source</b></summary>
 
-The build copies the two pure-Python packages into `geoadaptels_palette/vendor/` at build time, so it expects their checkouts **beside this repository**:
+The build copies the two pure-Python packages into `geoadaptels_palette/vendor/` at build time, so it expects pygeoadaptels in `adaptels/python/` of this repository and a checkout of [geopalette](https://github.com/igorpawelec/geopalette) **beside the repository**:
 
 ```
 parent/
-├── qgis-geoadaptels-geopalette/   <- this repo
-├── pygeoadaptels/
-└── pygeopalette/
+├── geosegments/        <- this repository: adaptels/python, qgis/
+└── geopalette/         <- python/pygeopalette
 ```
 
 ```bash
-python build_zip.py        # -> dist/geoadaptels_palette-<version>.zip
+python build_zip.py        # from qgis/ -> dist/geoadaptels_palette-<version>.zip
 ```
 
-`vendor/` and `dist/` are build artefacts and are not committed — the vendored copy is regenerated on every build so it can never quietly drift from the packages it was cut from. A tag `v*` builds the zip on GitHub and attaches it to the release.
+`vendor/` and `dist/` are build artefacts and are not committed — the vendored copy is regenerated on every build so it can never quietly drift from the packages it was cut from. A tag `qgis-v*` builds the zip on GitHub and attaches it to the release.
 
 </details>
 
 <details>
 <summary><b>What is tested, and what is not</b></summary>
 
-- **`geoadaptels_palette/core.py`** — the layer that actually calls the packages — is verified against the real test data by `test_package_calls.py`, which runs outside QGIS and also under QGIS's own Python:
+- **`geoadaptels_palette/core.py`** — the layer that actually calls the packages — is verified against the test data of the repository by `tests/test_core_calls.py`, which runs outside QGIS, in CI too:
 
   ```bash
-  PYTHONPATH="../pygeoadaptels;../pygeopalette;." python test_package_calls.py
+  python -m pytest tests        # from qgis/, with pygeoadaptels and pygeopalette installed
   ```
 
-  It confirms every wrapped call, including two corrections to the original spec (`read_raster` returns five values and a flat band; the colour conversion writes into a directory), and reproduces the dead-tree grow_seeds anchor: ~6195 px assigned.
+  It confirms every wrapped call, including two corrections to the original spec (`read_raster` returns five values and a flat band; the colour conversion writes into a directory), reproduces the dead-tree grow_seeds anchor (6,195 px assigned), and follows the nodata value through the chain SICLE, Enforce connectivity.
 
-- **The QGIS layer without a QGIS** — every module imports and every algorithm builds its dialog against a stub `qgis` module in CI (`tests/test_stub_import.py`), the code is linted, and the zip is built and checked for the two vendored packages.
+- **The QGIS layer without a QGIS** — every module imports and every algorithm builds its dialog against a stub `qgis` module in CI (`tests/test_stub_import.py`, `tests/test_helpers.py`), the code is linted, and the zip is built and checked for the two vendored packages.
 
 - **The QGIS layer in QGIS** — imports, the dependency bootstrap and the dialogs have been run in QGIS 3.40, 3.44 and 4.2 on Windows. All six algorithms execute and load their results; the figures above are that run, scripted.
 

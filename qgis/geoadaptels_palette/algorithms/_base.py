@@ -161,7 +161,7 @@ def require_packages(feedback):
         raise QgsProcessingException(
             "This algorithm needs the Python packages: "
             + ", ".join(missing)
-            + ".\nInstall them into QGIS's own Python and restart QGIS:\n  "
+            + ".\nInstall them into the plugin's libs folder and restart QGIS:\n  "
             + manual_hint())
 
 
