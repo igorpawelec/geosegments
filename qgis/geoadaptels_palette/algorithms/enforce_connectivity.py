@@ -44,13 +44,13 @@ class EnforceConnectivityAlgorithm(QgsProcessingAlgorithm):
             "distance. That competition is what gives the method its "
             "boundary adherence, and it can also cut an earlier adaptel in "
             "two &mdash; about 10% of them on a typical scene.</p>"
-            "<p>Harmless if the labels are only a lookup. <b>Not</b> "
+            "<p>Harmless if the labels are only a lookup. <strong>Not</strong> "
             "harmless for zonal statistics, which would average two "
             "spatially separate patches into one 'object'. The adaptel count "
             "rises by roughly 10%; nothing is merged and no pixel changes "
             "hands. <code>min_size</code> absorbs fragments below a size "
             "into a neighbour instead of keeping them.</p>"
-            "<p>This tests <b>4</b>-connectivity, the adaptels grower's "
+            "<p>This tests <strong>4</strong>-connectivity, the adaptels grower's "
             "neighbourhood. Do not run it on SICLE or Grow Seeds output, "
             "which is 8-connected by construction.</p>")
 

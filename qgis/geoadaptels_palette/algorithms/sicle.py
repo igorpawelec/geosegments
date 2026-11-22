@@ -48,7 +48,7 @@ class SicleAlgorithm(QgsProcessingAlgorithm):
             "as a <i>speed</i> setting whose rationale is specific to the "
             "differential IFT this does not use &mdash; raising it can "
             "improve delineation.</p>"
-            "<p>A <b>saliency</b> raster (e.g. a normalised CHM) makes seeds "
+            "<p>A <strong>saliency</strong> raster (e.g. a normalised CHM) makes seeds "
             "near object borders survive removal. It must not be nodata "
             "where the raster is valid.</p>"
             "<p>Every label is a single 8-connected region, so do not follow "
