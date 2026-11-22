@@ -69,13 +69,22 @@ class GrowSeedsAlgorithm(QgsProcessingAlgorithm):
             "<li><code>max_cost = 15</code></li>"
             "<li><code>max_radius = 20</code> px &mdash; <b>not optional</b>. "
             "There is no plateau on this kind of scene: past &Delta;E&asymp;"
-            "25 one seed floods the whole image.</li>"
+            "25 one seed floods the whole image. With neither a cost nor a "
+            "radius every pixel of the raster is given to one of the "
+            "points.</li>"
             "<li><code>fill_holes</code> on &mdash; closes the pockets a cost "
             "cut leaves inside a crown.</li>"
             "</ul>"
             "<p>Label <i>i</i> is the region grown from the <i>i</i>-th "
             "point, so the result joins back to that point's attributes. Two "
-            "points in one pixel is an error, not a silent merge.</p>")
+            "points in one pixel is an error, not a silent merge.</p>"
+            "<p>The dialog opens with <code>max_cost</code> 15 and "
+            "<code>max_radius</code> 20, the two numbers of the recipe that "
+            "do not depend on the band count. Empty either field to lift "
+            "that limit. <code>band_weights</code> stays empty, because the "
+            "recipe's three weights fit a three-band CIELAB raster only. A "
+            "script that leaves <code>MAX_COST</code> and "
+            "<code>MAX_RADIUS</code> out grows without them, as before.</p>")
 
     def helpUrl(self):
         return "https://github.com/igorpawelec/geosegments/blob/main/adaptels/python/docs/grow_seeds_guide.md"
@@ -87,7 +96,8 @@ class GrowSeedsAlgorithm(QgsProcessingAlgorithm):
             self.POINTS, "Seed points", [QgsProcessing.TypeVectorPoint]))
         self.addParameter(QgsProcessingParameterNumber(
             self.MAX_COST, "max_cost (delta-E tolerance; empty = no cap)",
-            QgsProcessingParameterNumber.Double, optional=True, minValue=0.0))
+            QgsProcessingParameterNumber.Double, defaultValue=15.0,
+            optional=True, minValue=0.0))
         self.addParameter(QgsProcessingParameterString(
             self.BAND_WEIGHTS, "band_weights (comma-separated, e.g. 0.5,2.5,1)",
             optional=True))
@@ -101,7 +111,8 @@ class GrowSeedsAlgorithm(QgsProcessingAlgorithm):
             minValue=1)))
         self.addParameter(QgsProcessingParameterNumber(
             self.MAX_RADIUS, "max_radius (pixels; empty = unlimited)",
-            QgsProcessingParameterNumber.Integer, optional=True, minValue=1))
+            QgsProcessingParameterNumber.Integer, defaultValue=20,
+            optional=True, minValue=1))
         self.addParameter(advanced(QgsProcessingParameterBoolean(
             self.FILL_HOLES, "fill_holes", defaultValue=True)))
         self.addParameter(QgsProcessingParameterRasterDestination(
@@ -111,6 +122,15 @@ class GrowSeedsAlgorithm(QgsProcessingAlgorithm):
             createByDefault=False))
 
     def _optional_set(self, parameters, key):
+        """Whether the operator, or the script, gave this limit a value.
+
+        Read from the parameters as they were passed, not through
+        ``parameterAsDouble``, which would fill in the default. The dialog
+        passes every field, so there the defaults of 0.5.8 (max_cost 15,
+        max_radius 20) apply until a field is emptied, which arrives as None.
+        A script that leaves the key out grows without that limit, as it did
+        before the dialog had defaults: its results must not change under it.
+        """
         return parameters.get(key) is not None and parameters.get(key) != ""
 
     def prepareAlgorithm(self, parameters, context, feedback):
