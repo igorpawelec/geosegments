@@ -110,13 +110,13 @@ def _validate_seeds(seeds, mask_flat, rows, cols):
     outside = (r < 0) | (r >= rows) | (c < 0) | (c >= cols)
     if outside.any():
         raise ValueError(
-            f"seed(s) at input index {list(np.where(outside)[0])} lie outside "
+            f"seed(s) at input index {np.where(outside)[0].tolist()} lie outside "
             f"the raster ({rows}x{cols})")
     flat = (r * cols + c).astype(np.int64)
     on_nodata = mask_flat[flat] != 0
     if on_nodata.any():
         raise ValueError(
-            f"seed(s) at input index {list(np.where(on_nodata)[0])} fall on "
+            f"seed(s) at input index {np.where(on_nodata)[0].tolist()} fall on "
             f"nodata pixels")
     # Duplicate pixels would give two labels the same seed and silently merge
     # two of the operator's points; raise with the offending input indices so
