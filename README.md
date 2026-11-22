@@ -16,7 +16,7 @@ A raster goes in; a segmentation comes out, as a label raster or as polygons. Th
 | Python | [`pygeoadaptels`](adaptels/python/) | ![latest pygeoadaptels tag](https://img.shields.io/github/v/tag/igorpawelec/geosegments?filter=pygeoadaptels-v*&label=) | `pip install --no-deps "git+https://github.com/igorpawelec/geosegments.git#subdirectory=adaptels/python"` |
 | R | [`rgeoadaptels`](adaptels/r/) | ![latest rgeoadaptels tag](https://img.shields.io/github/v/tag/igorpawelec/geosegments?filter=rgeoadaptels-v*&label=) | `remotes::install_github("igorpawelec/geosegments", subdir = "adaptels/r")` |
 | QGIS | [GeoAdaptels + GeoPalette plugin](qgis/) | ![latest qgis tag](https://img.shields.io/github/v/tag/igorpawelec/geosegments?filter=qgis-v*&label=) | `geoadaptels_palette-<version>.zip` from the [releases page](https://github.com/igorpawelec/geosegments/releases), then *Plugins → Manage and Install Plugins → Install from ZIP* |
-| Python | [`sigments`](sigments/) | research prototype, not released | `pip install -e sigments` from a clone |
+| Python | [`sigments`](sigments/) | research prototype, not released | `pip install -e "sigments[io]"` from a clone (`[io]` adds rasterio and geopandas, which the command line needs) |
 
 The two adaptels packages are bit-identical and are compared with each other whenever either changes ([parity workflow](.github/workflows/parity.yml)). The plugin carries `pygeoadaptels` from the same commit.
 
