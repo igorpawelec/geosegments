@@ -88,12 +88,15 @@ A C compiler is needed, which R already requires on Linux and macOS; on Windows 
 ```r
 library(rgeoadaptels)
 
-# data is (bands, rows, cols), or a plain matrix for one band
+# data is (bands, rows, cols), or a plain matrix for one band. Nodata is NA,
+# or what mask = marks as non-zero; a bare array with zeros outside the
+# scene counts them as data (2,770 adaptels on the test plot, not 2,792)
 seg <- adaptels(data, threshold = 60)
 seg$n_adaptels
 seg$labels          # integer matrix, 0-based ids, -9999 for nodata
 
-adaptels_raster("scene.tif", "adaptels.tif", threshold = 60)   # with a raster, via terra
+adaptels_raster("scene.tif", "adaptels.tif", threshold = 60)   # with a raster, via terra;
+                                                               # the file's nodata becomes the mask
 ```
 
 ```r
@@ -136,7 +139,7 @@ Not applied automatically, because it changes the adaptel count.
 Bit-identical, and checked rather than asserted:
 
 ```sh
-pip install pygeoadaptels
+pip install ../python          # pygeoadaptels from this checkout
 python3 tools/generate_pygeoadaptels_reference.py
 Rscript tools/cross_validate_against_pygeoadaptels.R
 ```
@@ -159,7 +162,7 @@ Three details make that possible, and all three are easy to get wrong:
 <details>
 <summary><b>The figures</b></summary>
 
-`Rscript www/figures.R` from the repository root remakes the three figures from the files in `test_data/` — the orthophoto, its CIELAB version made with pygeopalette, and the 36 dead-tree points — using the package in the checkout (`pkgload`) rather than an installed copy, and prints the numbers the captions quote.
+`Rscript www/figures.R` from this folder remakes the three figures from the files in `test_data/` — the orthophoto, its CIELAB version made with pygeopalette, and the 36 dead-tree points — using the package in the checkout (`pkgload`) rather than an installed copy, and prints the numbers the captions quote.
 
 </details>
 

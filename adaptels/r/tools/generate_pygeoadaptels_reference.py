@@ -1,11 +1,11 @@
 """Write reference segmentations from pygeoadaptels.
 
-    pip install pygeoadaptels
+    pip install ../python          # pygeoadaptels from this checkout
     python3 tools/generate_pygeoadaptels_reference.py
 
 Synthetic scenes only, so this runs on a machine that has no raster data.
 The agreement was also checked locally against the real 400x400 three-band
-scene in the pygeoadaptels repository, which cannot be shipped here.
+scene in test_data, which this script does not read.
 
 Covers every parameter path, because the ones left out are exactly the ones
 that drift: connectivity 4 and 8, all three metrics on their own scales, a

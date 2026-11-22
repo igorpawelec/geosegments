@@ -1,6 +1,6 @@
 # The README figures, generated from test_data so they can be remade.
 #
-#     Rscript www/figures.R           # from the repository root
+#     Rscript www/figures.R           # from adaptels/r, the package folder
 #
 # Writes three figures and prints the numbers the README captions quote:
 #   www/pipeline.png    the orthophoto with hand-placed dead-tree points, the
