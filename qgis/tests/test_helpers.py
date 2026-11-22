@@ -252,3 +252,24 @@ def test_library_logging_is_put_back_when_the_run_fails():
         with _base.package_errors():
             raise ValueError("no")
     assert [(logging.getLogger(n).propagate, list(logging.getLogger(n).handlers)) for n in ("rasterio", "fiona")] == before
+
+
+def test_overlapping_runs_leave_the_loggers_as_they_found_them():
+    """Two runs at once, the first to start being the first to finish. Each used
+    to save and restore the propagation on its own: the first switched it back
+    on under the second, and the second then left it off for good."""
+    import logging
+    names = ("rasterio", "fiona")
+    state = [(logging.getLogger(n).propagate, list(logging.getLogger(n).handlers)) for n in names]
+    first, second = _base.library_logs(), _base.library_logs()
+    first.__enter__()
+    second.__enter__()
+    assert all(logging.getLogger(n).propagate is False for n in names)
+    first.__exit__(None, None, None)
+    assert all(logging.getLogger(n).propagate is False for n in names)      # the second is still running
+    second.__exit__(None, None, None)
+    assert [(logging.getLogger(n).propagate, list(logging.getLogger(n).handlers)) for n in names] == state
+    # and once more, to see that nothing is left counted
+    with _base.library_logs():
+        assert all(logging.getLogger(n).propagate is False for n in names)
+    assert [(logging.getLogger(n).propagate, list(logging.getLogger(n).handlers)) for n in names] == state

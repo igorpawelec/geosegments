@@ -3,6 +3,7 @@ warm-up, the wrapper that turns a package's refusal into a message, and the
 parameter-flag helper that keeps the dialogs from overwhelming an operator."""
 import contextlib
 import logging
+import threading
 
 from qgis.core import QgsProcessingException
 
@@ -46,6 +47,23 @@ def package_errors():
         raise QgsProcessingException(text) from exc
 
 
+# Runs overlap: two dialogs working in the background, or this plugin and its
+# sibling (GeoSnag, GeoAdaptels + GeoPalette), which does the same to the same
+# two loggers from its own copy of this routine. So what a run changes is
+# counted on the logger itself, under names both plugins use: the first run to
+# arrive stops the propagation and notes how it was, the last one to leave puts
+# it back. Saved and restored per run, the run that left first switched the
+# propagation back on under the one still working, and that one then left it
+# off for the rest of the session.
+_RUN_LOCK = "_geo_plugins_run_lock"
+_RUN_DEPTH = "_geo_plugins_run_depth"
+_RUN_PROPAGATE = "_geo_plugins_run_propagate"
+
+
+def _run_lock(logger):
+    return logger.__dict__.setdefault(_RUN_LOCK, threading.Lock())
+
+
 class _ToMessageLog(logging.Handler):
     """What a library logs, into the Log Messages panel under the plugin's name."""
 
@@ -73,22 +91,30 @@ def library_logs(names=("rasterio", "fiona")):
     the Python console. The run itself is fine; it reads as a crash.
 
     For the length of a run the two loggers get a handler that writes to the
-    Log Messages panel and stop propagating. Both are put back afterwards, so
-    nothing changes for anything else that uses them.
+    Log Messages panel and stop propagating. Both are put back when the last
+    run that asked for this has finished, so nothing changes for anything
+    else that uses them.
     """
     handler = _ToMessageLog()
-    saved = []
-    for name in names:
-        logger = logging.getLogger(name)
-        saved.append((logger, logger.propagate))
-        logger.addHandler(handler)
-        logger.propagate = False
+    loggers = [logging.getLogger(name) for name in names]
+    for logger in loggers:
+        with _run_lock(logger):
+            depth = getattr(logger, _RUN_DEPTH, 0)
+            if depth == 0:
+                setattr(logger, _RUN_PROPAGATE, logger.propagate)
+                logger.propagate = False
+            setattr(logger, _RUN_DEPTH, depth + 1)
+            logger.addHandler(handler)
     try:
         yield
     finally:
-        for logger, propagate in saved:
-            logger.removeHandler(handler)
-            logger.propagate = propagate
+        for logger in loggers:
+            with _run_lock(logger):
+                logger.removeHandler(handler)
+                depth = getattr(logger, _RUN_DEPTH, 1) - 1
+                setattr(logger, _RUN_DEPTH, max(depth, 0))
+                if depth <= 0:
+                    logger.propagate = getattr(logger, _RUN_PROPAGATE, True)
 
 
 def _log_traceback():
