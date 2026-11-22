@@ -9,6 +9,7 @@ Based on:
     https://gis.stackexchange.com/questions/417383/how-to-apply-gdal-polygonize
 """
 
+import math
 import os
 import numpy as np
 
@@ -53,6 +54,42 @@ def _ensure_deps():
     return shapes, fiona
 
 
+def _ring_area_length(ring):
+    """Area and length of one closed ring of (x, y) vertices.
+
+    The shoelace sum is taken on coordinates moved to the ring's first
+    vertex. In map coordinates the products are of the order of 1e11 and
+    their differences of the order of the pixel area, so the plain sum
+    carries an error of about 1e-4 m2, which is visible on a polygon of one
+    0.25 m pixel; moved to the origin it is exact to the last digits.
+    """
+    ox, oy = ring[0][0], ring[0][1]
+    x0 = y0 = 0.0
+    area2 = 0.0
+    length = 0.0
+    for pt in ring[1:]:
+        x1, y1 = pt[0] - ox, pt[1] - oy
+        area2 += x0 * y1 - x1 * y0
+        length += math.hypot(x1 - x0, y1 - y0)
+        x0, y0 = x1, y1
+    return abs(area2) / 2.0, length
+
+
+def polygon_area_perimeter(geom):
+    """Area and perimeter of a GeoJSON-like Polygon, in the units of its CRS.
+
+    The area is the outer ring's less the holes'; the perimeter is the length
+    of every ring, the holes' included, because a hole is boundary too.
+    """
+    rings = geom["coordinates"]
+    area, perimeter = _ring_area_length(rings[0])
+    for hole in rings[1:]:
+        a, length = _ring_area_length(hole)
+        area -= a
+        perimeter += length
+    return area, perimeter
+
+
 def vectorize_adaptels(labels, transform, crs_wkt,
                        output_path,
                        driver="ESRI Shapefile",
@@ -85,8 +122,17 @@ def vectorize_adaptels(labels, transform, crs_wkt,
     connectivity : int, optional
         Pixel connectivity for polygonization: 4 or 8. Default 4.
     compute_area : bool, optional
-        If True, compute polygon area (m²) and perimeter (m) from
-        pixel counts. Default True.
+        If True, write each polygon's area (``area_m2``) and perimeter
+        (``perimeter``), measured on its own geometry in the units of the
+        CRS: square metres and metres for a projected one. The perimeter
+        runs along pixel edges and counts the edges of holes. A label left
+        in several pieces is several features, each with the area and
+        perimeter of its piece, so the areas add up to the labelled area.
+        Default True.
+
+        Until 0.10.5 ``area_m2`` was the area of the whole label, repeated
+        on every piece of it, and ``perimeter`` was that of a circle of the
+        same area, ``2 * sqrt(pi * area)``.
 
     Returns
     -------
@@ -117,11 +163,6 @@ def vectorize_adaptels(labels, transform, crs_wkt,
     data = labels.astype(np.int32)
     mask = (data != int(nodata)) & (data >= 0)
 
-    # Pixel area for attribute computation
-    pixel_w = abs(transform.a)
-    pixel_h = abs(transform.e)
-    pixel_area = pixel_w * pixel_h
-
     # Schema
     props = {'adaptel_id': 'int'}
     if compute_area:
@@ -132,12 +173,6 @@ def vectorize_adaptels(labels, transform, crs_wkt,
         'geometry': 'Polygon',
         'properties': props,
     }
-
-    # Precompute pixel counts per adaptel (one pass, O(n_pixels))
-    if compute_area:
-        valid = data[mask]
-        max_id = int(valid.max()) + 1 if valid.size > 0 else 1
-        pixel_counts = np.bincount(valid, minlength=max_id)
 
     # Polygonize + write
     n_polygons = 0
@@ -168,11 +203,13 @@ def vectorize_adaptels(labels, transform, crs_wkt,
             }
 
             if compute_area:
-                n_pixels = int(pixel_counts[adaptel_id])
-                area = n_pixels * pixel_area
-                perimeter = 2.0 * np.sqrt(np.pi * area)
-                feature['properties']['area_m2'] = round(area, 2)
-                feature['properties']['perimeter'] = round(perimeter, 2)
+                # From the geometry, not from the label's pixel count: a
+                # label in two pieces is two features, and each must carry
+                # its own area, or the attribute sums to more than the map.
+                # Four decimals, because one 0.25 m pixel is 0.0625 m2.
+                area, perimeter = polygon_area_perimeter(geom)
+                feature['properties']['area_m2'] = round(area, 4)
+                feature['properties']['perimeter'] = round(perimeter, 4)
 
             batch.append(feature)
             n_polygons += 1
@@ -205,7 +242,8 @@ def vectorize_from_file(input_raster, output_path,
     connectivity : int
         Pixel connectivity (4 or 8).
     compute_area : bool
-        Compute area/perimeter attributes.
+        Write each polygon's own area and perimeter (see
+        :func:`vectorize_adaptels`).
 
     Returns
     -------

@@ -127,6 +127,8 @@ n_poly = vectorize_from_file("adaptels.tif", "adaptels.gpkg")   # or .shp, .geoj
 ```
 
 From the command line:
+Each polygon carries `adaptel_id`, its own `area_m2` and its `perimeter`, measured on its geometry along the pixel edges. An adaptel left in several pieces (see *Contiguity* below) is several polygons with one id, each with the area of its piece.
+
 
 ```bash
 pygeoadaptels -i input.tif -o output.tif -t 60.0
