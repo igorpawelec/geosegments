@@ -1,6 +1,17 @@
 # Changelog
 
 
+## [0.1.2] — 2026-11-23
+
+A pre-release, as 0.1.0 is.
+
+### Changed
+- **The package metadata name the repository.** `pyproject.toml` gives its homepage, its
+  source and its issue tracker, https://github.com/igorpawelec/geosegments, and a built
+  package carries the three as `Project-URL` entries. Nothing else changed: every image is
+  segmented exactly as in 0.1.1.
+
+
 ## [0.1.1] — 2026-11-23
 
 A pre-release, as 0.1.0 is.

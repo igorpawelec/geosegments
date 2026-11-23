@@ -27,7 +27,7 @@ whose name is still a working name. `CHANGELOG.md` lists them.
 # from the repository, without a clone; numpy, numba and scipy have to be installed
 pip install --no-deps "git+https://github.com/igorpawelec/geosegments.git#subdirectory=sigments"
 # the same, pinned to a version
-pip install --no-deps "git+https://github.com/igorpawelec/geosegments.git@sigments-v0.1.1#subdirectory=sigments"
+pip install --no-deps "git+https://github.com/igorpawelec/geosegments.git@sigments-v0.1.2#subdirectory=sigments"
 # from a clone, in this folder
 pip install -e .            # numpy, numba, scipy
 pip install -e .[io]        # plus rasterio and geopandas for the command line
