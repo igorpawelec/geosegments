@@ -46,7 +46,9 @@ labels, n = segment(data, k=9, smooth=0.0, stabilised=False)     # the fully inv
 
 `k` is the tolerance: lower values keep finer differences apart, higher values merge more.
 On the scenes tried so far the useful range is about 5 to 13. The label raster is int32
-with -1 on invalid pixels.
+with -1 on invalid pixels. `segment` raises a `ValueError` for a `k` that is not a positive
+number and for an image whose variability it cannot measure: no valid pixels, too few of
+them next to each other, or a constant image; the message says which.
 
 Tests: `python -m unittest discover -s tests` (pytest works too). They check that known
 regions are recovered over a wide range of `k` and that the result is identical after

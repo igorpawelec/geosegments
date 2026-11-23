@@ -77,6 +77,82 @@ class TheCall(unittest.TestCase):
             self.assertTrue(np.array_equal(labels, results[0][0]))
 
 
+class WhatIsRefused(unittest.TestCase):
+    """A ValueError with the reason in it, in place of a result that means nothing or of
+    an IndexError from inside the estimate."""
+
+    SETTINGS = [dict(smooth=sm, stabilised=st) for sm in (0.7, 0.0) for st in (True, False)]
+
+    @classmethod
+    def setUpClass(cls):
+        rng = np.random.default_rng(6)
+        cls.data = rng.normal(0, 1.0, size=(3, 40, 40))
+        cls.data[:, :, 20:] += 30.0
+
+    def refused(self, reason, data, **kw):
+        with self.assertRaisesRegex(ValueError, "cannot estimate that unit here: .*" + reason):
+            segment(data, k=9, **kw)
+
+    def test_k_has_to_be_a_positive_number(self):
+        for k in (0, 0.0, -1, -9.0, float("nan"), float("inf"), None, "nine", [5, 9]):
+            with self.subTest(k=k):
+                with self.assertRaisesRegex(ValueError, "k must be a positive number"):
+                    segment(self.data, k=k)
+        labels, n = segment(self.data, k=0.5)       # small is fine, it is only strict
+        self.assertGreaterEqual(n, 2)
+
+    def test_k_may_be_any_kind_of_number(self):
+        from decimal import Decimal
+        from fractions import Fraction
+        ref, n_ref = segment(self.data, k=9)
+        for k in (9.0, np.float32(9), np.int64(9), np.array(9.0), Fraction(9), Decimal("9")):
+            with self.subTest(k=repr(k)):
+                labels, n = segment(self.data, k=k)
+                self.assertEqual(n, n_ref)
+                self.assertTrue(np.array_equal(labels, ref))
+
+    def test_an_image_with_no_unit_is_refused_whatever_the_settings(self):
+        nobody = np.zeros((40, 40), dtype=bool)
+        one = nobody.copy(); one[5, 5] = True
+        apart = nobody.copy(); apart[5, 5] = apart[20, 30] = True
+        cases = [
+            ("no valid pixel", self.data, nobody, "no valid pixel"),
+            ("all NaN", np.full((3, 40, 40), np.nan), None, "no valid pixel"),
+            ("one valid pixel", self.data, one, "no two of its 1 valid pixels"),
+            ("two pixels apart", self.data, apart, "no two of its 2 valid pixels"),
+            ("a constant image", np.ones((3, 40, 40)), None, "do not differ anywhere"),
+            ("a constant band", np.full((40, 40), 7.5), None, "do not differ anywhere"),
+        ]
+        for name, data, valid, reason in cases:
+            for kw in self.SETTINGS:
+                with self.subTest(case=name, **kw):
+                    self.refused(reason, data, valid=valid, **kw)
+
+    def test_too_few_neighbours_for_the_variability_curve(self):
+        few = np.zeros((40, 40), dtype=bool)
+        few[10, 10:14] = True                        # four pixels in a row: three pairs
+        for smooth in (0.7, 0.0):
+            with self.subTest(smooth=smooth):
+                self.refused("3 pairs of neighbours are too few for the variability curve",
+                             self.data, valid=few, smooth=smooth, stabilised=True)
+        block = np.zeros((40, 40), dtype=bool)
+        block[10:14, 18:22] = True                   # 16 pixels across the edge: 24 pairs, enough
+        labels, n = segment(self.data, k=9, valid=block, smooth=0.0, stabilised=True)
+        self.assertTrue((labels[~block] == -1).all())
+        self.assertTrue(np.array_equal(np.unique(labels[block]), np.arange(n)))
+
+    def test_a_failed_estimate_gives_its_reason(self):
+        halves = np.zeros((20, 20))
+        halves[:, 10:] = 5.0                         # 20 of 760 pairs differ
+        for stabilised in (True, False):
+            with self.subTest(case="two flat halves, smoothed", stabilised=stabilised):
+                self.refused("more than half of its neighbouring pixels are identical",
+                             halves, smooth=0.7, stabilised=stabilised)
+        huge = np.random.default_rng(8).normal(size=(2, 20, 20)) * 1e307
+        with self.subTest(case="values too large to square"):
+            self.refused("", huge, smooth=0.7, stabilised=False)
+
+
 class ThePackage(unittest.TestCase):
     def test_a_plain_install_needs_numpy_numba_and_scipy_only(self):
         deps = re.search(r"^dependencies = \[(.*?)\]", read("pyproject.toml"), re.M).group(1)
