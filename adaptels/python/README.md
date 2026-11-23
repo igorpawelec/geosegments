@@ -158,6 +158,8 @@ Measured on the top-left 200 × 200 px of `test_data/SNP_21_2020_1.tif`, read as
 | 60 | 700 | | 0.03 | 855 |
 | 120 | 299 | | 0.2 | 99 |
 
+The counts in this table and in *Contiguity* below are printed by `python examples/readme_numbers.py`.
+
 **Contiguity.** Adaptels compete for pixels — a later adaptel takes a pixel from an earlier one whenever it reaches it with a smaller accumulated distance. That competition is what gives the method its boundary adherence, but it can also cut an earlier adaptel in two, leaving one label spread over separate patches. On the 400 × 400 px test raster at threshold 60, read as a plain array, 265 of 2770 adaptels (9.6 %) come out in more than one piece, the worst in four. (`create_adaptels` on the file masks the nodata outside the circular plot, which `adaptels_from_array` on the bare array cannot know about: that is the 2,792 of the figures above, 247 of them split, 3,060 after `enforce_connectivity`.) Harmless if the labels are only a lookup; not harmless for zonal statistics, which would average two separate patches into one "object":
 
 ```python
@@ -167,7 +169,7 @@ labels, n = adaptels_from_array(data, threshold=60.0)   # 2770, 265 split
 labels, n = enforce_connectivity(labels)                # 3066, 0 split
 ```
 
-Every connected component becomes its own adaptel, so the count rises by about 10 %. Nothing is merged and no pixel changes hands. `min_size=` absorbs fragments below a size into an adjacent adaptel instead. Needs `scipy`. Not applied automatically, because it changes the count.
+Every connected component becomes its own adaptel, so the count rises by about 11 %. Nothing is merged and no pixel changes hands. `min_size=` absorbs fragments below a size into an adjacent adaptel instead. Needs `scipy`. Not applied automatically, because it changes the count.
 
 ### `grow_seeds`
 
@@ -197,7 +199,7 @@ Labels are 0-based and `-1` outside the mask; `create_sicle` writes that `-1` as
 <details>
 <summary><b>Performance, repository layout, requirements, testing</b></summary>
 
-First call includes Numba JIT compilation (~5 s). Subsequent calls run at near-C speed: a 400 × 400 px 3-band raster in 0.07 s (~2 800 adaptels), 2000 × 2000 px in about 2 s (~70 000). `python examples/timing.py` measures both on your machine.
+First call includes Numba JIT compilation, which takes a few seconds. Subsequent calls run at near-C speed: on a laptop a 400 × 400 px 3-band raster takes under 0.1 s (~2 800 adaptels) and 2000 × 2000 px 2 to 3 s (~70 000). `python examples/timing.py` measures both on your machine.
 
 ```
 pygeoadaptels/
