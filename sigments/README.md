@@ -19,15 +19,15 @@ whole objects or as primitives for a later classification is not decided yet.
 
 ## Install and run
 
-Version 0.1.0 is tagged `sigments-v0.1.0`, as a pre-release: the tag pins the code for
-software that uses the segmentation, and says nothing more about a research prototype
-whose name is still a working name.
+Versions are tagged `sigments-vX.Y.Z` and published as pre-releases: a tag pins the code
+for software that uses the segmentation, and says nothing more about a research prototype
+whose name is still a working name. `CHANGELOG.md` lists them.
 
 ```bash
 # from the repository, without a clone; numpy, numba and scipy have to be installed
 pip install --no-deps "git+https://github.com/igorpawelec/geosegments.git#subdirectory=sigments"
 # the same, pinned to a version
-pip install --no-deps "git+https://github.com/igorpawelec/geosegments.git@sigments-v0.1.0#subdirectory=sigments"
+pip install --no-deps "git+https://github.com/igorpawelec/geosegments.git@sigments-v0.1.1#subdirectory=sigments"
 # from a clone, in this folder
 pip install -e .            # numpy, numba, scipy
 pip install -e .[io]        # plus rasterio and geopandas for the command line

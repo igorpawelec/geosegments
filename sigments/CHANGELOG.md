@@ -1,6 +1,34 @@
 # Changelog
 
 
+## [0.1.1] — 2026-11-23
+
+A pre-release, as 0.1.0 is.
+
+### Changed
+- **`segment` refuses a `k` that is not a positive number**, with a `ValueError`. Zero and
+  negative values were accepted and gave a result that meant nothing.
+- **An image with no unit to measure in is refused, with a `ValueError` that says why.**
+  `segment` and `noise_units` refuse, whatever the settings: an image with no valid pixel;
+  one in which no two valid pixels are neighbours; one in which neighbouring pixels do not
+  differ anywhere, a constant image for one; and, with `stabilised`, one with fewer pairs
+  of neighbours than the variability curve has bins (24). An estimate that fails further
+  on, or does not come out finite, is reported the same way; that is what happens with
+  smoothing on when more than half of the neighbouring pixels are identical.
+  In 0.1.0 these ended differently by setting. With `stabilised` most stopped with an
+  `IndexError` or a `numpy.linalg.LinAlgError` from inside the estimate. Without it an
+  image with no valid pixel came back as all -1 with `n = 0`, isolated pixels as one
+  segment each, and a constant image without smoothing as one segment.
+
+Every other image is segmented exactly as in 0.1.0.
+
+### Known limits
+- An image in which most neighbouring pixels are identical, large flat areas for
+  instance, is refused when smoothing is on. With `smooth=0` it is segmented, in a unit
+  taken from the few pairs that do differ, and two flat halves with a clear edge between
+  them come out as one segment. Mask the flat areas out.
+
+
 ## [0.1.0] — 2026-11-23
 
 First tagged version, a pre-release. sigments is a research prototype: the method is not

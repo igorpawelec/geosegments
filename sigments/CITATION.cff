@@ -10,7 +10,7 @@ authors:
     orcid: "https://orcid.org/0009-0005-9798-3596"
 repository-code: "https://github.com/igorpawelec/geosegments"
 license: GPL-3.0-or-later
-version: "0.1.0"
+version: "0.1.1"
 date-released: "2026-11-23"
 keywords:
   - image segmentation
