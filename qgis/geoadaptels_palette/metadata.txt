@@ -4,7 +4,7 @@ qgisMinimumVersion=3.28
 qgisMaximumVersion=4.99
 supportsQt6=True
 description=Colour-space conversion and seeded/adaptive superpixel segmentation for forestry orthophotos.
-version=0.5.10
+version=0.5.11
 author=Igor Pawelec
 email=igor.pawelec@urk.edu.pl
 about=QGIS Processing provider wrapping the pygeoadaptels and pygeopalette Python packages: adaptels, SICLE, seeded region growing (grow_seeds), connectivity enforcement, vectorization, and 15 colour-space conversions. The algorithms stay in the packages; this plugin is glue. Both packages are bundled inside the plugin, so they need no download; numba, rasterio and fiona are installed into the plugin's own libs folder on first run.
@@ -17,7 +17,8 @@ tags=raster,segmentation,superpixels,colour,forestry,remote sensing,orthophoto
 experimental=True
 hasProcessingProvider=yes
 deprecated=False
-changelog=0.5.10 -- bundles pygeopalette 0.8.0: the bands of a converted raster carry the names of their components (L, a, b for CIELAB), so the layer lists them by name where it listed Band 1 to Band 3. The values are unchanged.
+changelog=0.5.11 -- bundles pygeoadaptels 0.10.6: the compute kernels no longer hold Python's global interpreter lock while they run, so other Python code in QGIS is not stopped for the length of a segmentation. The results are bit-identical. The first run after the update compiles the kernels again.
+    0.5.10 -- bundles pygeopalette 0.8.0: the bands of a converted raster carry the names of their components (L, a, b for CIELAB), so the layer lists them by name where it listed Band 1 to Band 3. The values are unchanged.
     0.5.9 -- two runs at the same time, or a run of this plugin and one of GeoSnag, no longer leave the rasterio and fiona loggers switched off for the rest of the session. The guard against the 'Logging error' traceback, new in 0.5.8, saved and restored the loggers per run; it now counts the runs. No change in the tools.
     0.5.8 -- results are styled again: on QGIS 4 the label palette, the crown outlines and the colour-space stretch were lost and every result loaded with QGIS's default style. A mistake in the input (a threshold on the wrong scale, a point outside the raster, a one-band raster for a colour space, an output folder that does not exist) is reported as a message, not as a Python traceback; the traceback goes to the Log Messages panel. The help texts are readable in dark themes. A warning that GDAL passes to rasterio no longer prints a 'Logging error' traceback into the Python console when another plugin has left the root logger without a stream. The Grow seeds dialog opens with max_cost 15 and max_radius 20; with both fields emptied every pixel is given to one of the points, and a script that leaves the two out is not affected. Enforce connectivity keeps a negative nodata value of its input (-1 from SICLE and Grow seeds) instead of declaring -9999 over it. Bundles pygeoadaptels 0.10.5: the SICLE raster declares the nodata value it holds (-1), and area_m2 and perimeter of the vectorised polygons are measured on each polygon, which changes their values. The copy of numpy that pip leaves in the plugin's libs folder, about 54 MB that QGIS never reads, is removed.
     0.5.7 -- a new icon: a Q around the segments of the geosegments mark, three of them in the colours of the geopalette bands, drawn from a vector source. No change in the algorithms.
