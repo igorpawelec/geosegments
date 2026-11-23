@@ -16,9 +16,12 @@ def _prepare(data, valid):
     data = np.asarray(data, dtype=np.float64)
     if data.ndim == 2:
         data = data[None]
-    if valid is None:
-        valid = np.isfinite(data).all(axis=0)
-    return data, np.asarray(valid, dtype=bool)
+    # A mask says which pixels to use; it cannot make a pixel that is not a
+    # number usable. Taken as given, a NaN under a True of the mask went into
+    # the noise estimate, and a scene that is one segment came out as hundreds.
+    finite = np.isfinite(data).all(axis=0)
+    valid = finite if valid is None else np.asarray(valid, dtype=bool) & finite
+    return data, valid
 
 
 def noise_units(data, valid=None, smooth=0.7, stabilised=True):
