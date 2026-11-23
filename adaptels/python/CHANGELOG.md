@@ -1,6 +1,24 @@
 # Changelog
 
 
+## [0.10.6] — 2026-11-23
+
+### Changed
+- **The compiled kernels release the GIL while they run.** A program that
+  calls `adaptels_from_array`, `sicle_from_array`, `grow_seeds` or the file
+  functions in a worker thread stays responsive: its main thread was stopped
+  for the whole of each kernel call, which froze a desktop application's
+  window. On the test orthophoto tiled 5 × 5 (2000 × 2000 px), a main thread
+  waking every millisecond waited up to 2.2-2.5 s for adaptels and 2.2 s for
+  SICLE; it now waits at most 5 ms. Nothing else changed: the labels are
+  bit-identical to 0.10.5.
+- The first call after the update compiles the kernels again, as after any
+  change to them; the cached builds of 0.10.5 are not reused.
+- `tests/test_nogil.py` fails for any compiled function of the package that
+  is not declared `nogil`, so a kernel added later cannot bring the freeze
+  back unnoticed.
+
+
 ## [0.10.5] — 2026-11-22
 
 ### Fixed
