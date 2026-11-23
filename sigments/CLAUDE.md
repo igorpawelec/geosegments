@@ -26,7 +26,11 @@
 * Numbers quoted in `README.md` come from a named script in `bench/`; a number without its script does
   not go in. Report negative results as plainly as positive ones.
 * sigments is under GPL-3.0-or-later, like the rest of the `geosegments` repository, which is public
-  (Igor's decision of 2026-11-20). It is still a research prototype: it has no release and no tag, and
-  the name of the method is a working name until the literature check listed in `README.md` is done.
+  (Igor's decision of 2026-11-20). It is still a research prototype, and the name of the method is a
+  working name until the literature check listed in `README.md` is done. Since 2026-11-23 it has
+  versions tagged `sigments-vX.Y.Z` and published as pre-releases (Igor's decision, so that OBIAStudio
+  can pin the code it was tested with): the version is in `pyproject.toml`, `sigments/__init__.py`,
+  `CITATION.cff` and `CHANGELOG.md`, `tests/test_contract.py` holds them together and holds the
+  signature and the result of `segment`, which a new version changes only on purpose.
 * Code, comments, commit messages and docs in English.
 * Authorship and agent scopes: `.claude/rules/` at the repository root.

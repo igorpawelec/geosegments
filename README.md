@@ -16,7 +16,7 @@ A raster goes in; a segmentation comes out, as a label raster or as polygons. Th
 | Python | [`pygeoadaptels`](adaptels/python/) | ![latest pygeoadaptels tag](https://img.shields.io/github/v/tag/igorpawelec/geosegments?filter=pygeoadaptels-v*&label=) | `pip install --no-deps "git+https://github.com/igorpawelec/geosegments.git#subdirectory=adaptels/python"` |
 | R | [`rgeoadaptels`](adaptels/r/) | ![latest rgeoadaptels tag](https://img.shields.io/github/v/tag/igorpawelec/geosegments?filter=rgeoadaptels-v*&label=) | `remotes::install_github("igorpawelec/geosegments", subdir = "adaptels/r")` |
 | QGIS | [GeoAdaptels + GeoPalette plugin](qgis/) | ![latest qgis tag](https://img.shields.io/github/v/tag/igorpawelec/geosegments?filter=qgis-v*&label=) | `geoadaptels_palette-<version>.zip` from the [releases page](https://github.com/igorpawelec/geosegments/releases), then *Plugins → Manage and Install Plugins → Install from ZIP* |
-| Python | [`sigments`](sigments/) | research prototype, not released | `pip install -e "sigments[io]"` from a clone (`[io]` adds rasterio and geopandas, which the command line needs) |
+| Python | [`sigments`](sigments/) | ![latest sigments tag](https://img.shields.io/github/v/tag/igorpawelec/geosegments?filter=sigments-v*&label=) pre-release, research prototype | `pip install --no-deps "git+https://github.com/igorpawelec/geosegments.git#subdirectory=sigments"`; the command line also needs rasterio and geopandas (`pip install -e "sigments[io]"` from a clone) |
 
 The two adaptels packages are bit-identical and are compared with each other whenever either changes ([parity workflow](.github/workflows/parity.yml)). The plugin carries `pygeoadaptels` from the same commit.
 
@@ -73,7 +73,7 @@ python -m sigments ortho.tif labels.tif --k 9
 
 ## Releases
 
-Each part is versioned and tagged on its own, and the tag carries the name of the part: `pygeoadaptels-vX.Y.Z`, `rgeoadaptels-vX.Y.Z`, `qgis-vX.Y.Z`. The tags up to `pygeoadaptels-v0.10.4`, `rgeoadaptels-v0.4.0` and `qgis-v0.5.5` were carried over, with the full history, from the repositories the parts used to live in: `pygeoadaptels`, `rgeoadaptels` and `qgis-geoadaptels-geopalette`. A `qgis-v` tag builds the plugin zip and attaches it to a release.
+Each part is versioned and tagged on its own, and the tag carries the name of the part: `pygeoadaptels-vX.Y.Z`, `rgeoadaptels-vX.Y.Z`, `qgis-vX.Y.Z`, `sigments-vX.Y.Z`. The sigments tags are published as pre-releases while it is a research prototype. The tags up to `pygeoadaptels-v0.10.4`, `rgeoadaptels-v0.4.0` and `qgis-v0.5.5` were carried over, with the full history, from the repositories the parts used to live in: `pygeoadaptels`, `rgeoadaptels` and `qgis-geoadaptels-geopalette`. A `qgis-v` tag builds the plugin zip and attaches it to a release.
 
 ## Citation
 
@@ -81,7 +81,7 @@ The adaptels and their use for standing dead trees are described in:
 
 > Pawelec, I., Hawryło, P., Netzel, P., & Socha, J. (2026). Evaluating superpixel algorithms for standing dead tree delineation using aerial orthoimagery. *International Journal of Applied Earth Observation and Geoinformation*, 147, 105180. https://doi.org/10.1016/j.jag.2026.105180
 
-Each released part carries its own citation metadata: [adaptels/python/CITATION.cff](adaptels/python/CITATION.cff), [adaptels/r/CITATION.cff](adaptels/r/CITATION.cff) and [qgis/CITATION.cff](qgis/CITATION.cff).
+Each released part carries its own citation metadata: [adaptels/python/CITATION.cff](adaptels/python/CITATION.cff), [adaptels/r/CITATION.cff](adaptels/r/CITATION.cff), [qgis/CITATION.cff](qgis/CITATION.cff) and [sigments/CITATION.cff](sigments/CITATION.cff).
 
 ## Licence
 

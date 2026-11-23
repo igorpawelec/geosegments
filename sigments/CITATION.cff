@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+title: "sigments: sigma-regulated segments, image segmentation with one dimensionless tolerance (research prototype)"
+message: "If you use this software, please cite it as below."
+type: software
+authors:
+  - family-names: Pawelec
+    given-names: Igor
+    affiliation: "University of Agriculture in Kraków, Poland"
+    email: igor.pawelec@urk.edu.pl
+    orcid: "https://orcid.org/0009-0005-9798-3596"
+repository-code: "https://github.com/igorpawelec/geosegments"
+license: GPL-3.0-or-later
+version: "0.1.0"
+date-released: "2026-11-23"
+keywords:
+  - image segmentation
+  - region growing
+  - orthophoto
+  - remote sensing

@@ -8,6 +8,8 @@ from .merge import Hierarchy, ladder, merge_hierarchy
 from .noise import stabilise, whiten
 from .tessellate import tessellate
 
+__version__ = "0.1.0"
+
 __all__ = ["segment", "noise_units", "tessellate", "whiten", "stabilise", "hierarchy", "ladder",
            "merge_hierarchy", "Hierarchy", "basins"]
 

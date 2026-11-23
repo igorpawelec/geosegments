@@ -3,9 +3,9 @@ message: >-
   If you use this software, please cite the method paper listed under
   references and the part you used. Each released part carries its own
   citation metadata with its version: adaptels/python/CITATION.cff for
-  pygeoadaptels, adaptels/r/CITATION.cff for rgeoadaptels and
-  qgis/CITATION.cff for the QGIS plugin. This file names the repository as a
-  whole.
+  pygeoadaptels, adaptels/r/CITATION.cff for rgeoadaptels,
+  qgis/CITATION.cff for the QGIS plugin and sigments/CITATION.cff for
+  sigments. This file names the repository as a whole.
 title: "geosegments: image segmentation for geospatial rasters with adaptive superpixels and seeded growing, in Python, R and QGIS"
 type: software
 license: GPL-3.0-or-later

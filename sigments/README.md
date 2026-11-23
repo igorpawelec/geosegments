@@ -19,7 +19,16 @@ whole objects or as primitives for a later classification is not decided yet.
 
 ## Install and run
 
+Version 0.1.0 is tagged `sigments-v0.1.0`, as a pre-release: the tag pins the code for
+software that uses the segmentation, and says nothing more about a research prototype
+whose name is still a working name.
+
 ```bash
+# from the repository, without a clone; numpy, numba and scipy have to be installed
+pip install --no-deps "git+https://github.com/igorpawelec/geosegments.git#subdirectory=sigments"
+# the same, pinned to a version
+pip install --no-deps "git+https://github.com/igorpawelec/geosegments.git@sigments-v0.1.0#subdirectory=sigments"
+# from a clone, in this folder
 pip install -e .            # numpy, numba, scipy
 pip install -e .[io]        # plus rasterio and geopandas for the command line
 ```
@@ -41,7 +50,9 @@ with -1 on invalid pixels.
 
 Tests: `python -m unittest discover -s tests` (pytest works too). They check that known
 regions are recovered over a wide range of `k` and that the result is identical after
-mixing or rescaling the bands and after rotating or mirroring the raster.
+mixing or rescaling the bands and after rotating or mirroring the raster, and they hold
+the call and the result described above (`tests/test_contract.py`), which is what a
+pinned version is pinned for.
 
 ## What is here
 
