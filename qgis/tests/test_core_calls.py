@@ -61,6 +61,7 @@ def test_convert_colourspace_writes_the_one_file_asked_for(tmp_path):
     assert core.run_convert_colourspace(RGB, "lab", out) == out
     with rasterio.open(out) as src:
         assert src.count == 3 and src.dtypes[0] == "float32"
+        assert src.descriptions == ("L", "a", "b")        # named by pygeopalette 0.8.0
         mine = src.read()
     with rasterio.open(LAB) as src:
         assert float(np.nanmax(np.abs(mine - src.read()))) < 1e-3

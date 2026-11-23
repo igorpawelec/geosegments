@@ -47,7 +47,8 @@ class ConvertColourSpaceAlgorithm(QgsProcessingAlgorithm):
         return (
             "<p>Convert an RGB raster into a perceptual or alternative colour "
             "space &mdash; 15 of them, from CIELAB and CIECAM02 to Oklab and "
-            "Jzazbz.</p>"
+            "Jzazbz. The bands of the result carry the names of the "
+            "components: L, a and b for CIELAB.</p>"
             "<p>This is the step that makes <i>Grow Seeds</i>' "
             "<code>max_cost</code> meaningful: in CIELAB a distance of 1 is "
             "roughly one just-noticeable difference, so the tolerance reads "
