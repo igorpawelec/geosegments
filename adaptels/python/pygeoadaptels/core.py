@@ -18,7 +18,7 @@ from numba import njit, int32, int64, float64
 # Min-heap operations (mirrors minlist.c)
 # ==========================================================================
 
-@njit(cache=True)
+@njit(cache=True, nogil=True)
 def heap_insert(h_dist, h_x, h_y, h_idx, h_size, dist, x, y, idx):
     """Insert into min-heap. Returns new size."""
     h_size += 1
@@ -41,7 +41,7 @@ def heap_insert(h_dist, h_x, h_y, h_idx, h_size, dist, x, y, idx):
     return h_size
 
 
-@njit(cache=True)
+@njit(cache=True, nogil=True)
 def heap_extract(h_dist, h_x, h_y, h_idx, h_size):
     """Extract minimum from heap. Returns (dist, x, y, idx, new_size)."""
     dist = h_dist[1]
@@ -81,7 +81,7 @@ def heap_extract(h_dist, h_x, h_y, h_idx, h_size):
 # Distance calculation (mirrors generate.c calc_distance)
 # ==========================================================================
 
-@njit(cache=True)
+@njit(cache=True, nogil=True)
 def calc_distance(layers, n_layers, cumul_sum, index, 
                   superpixel_size, distance_type, minkowski_p):
     """
@@ -138,7 +138,7 @@ DY = np.array([0, -1, 0, 1, -1, -1, 1, 1], dtype=np.int32)
 # Growable buffers
 # ==========================================================================
 
-@njit(cache=True)
+@njit(cache=True, nogil=True)
 def _seeds_grow(sx, sy, sidx):
     """Double the seed arrays, preserving contents. Rebind all three."""
     cap = sx.shape[0]
@@ -152,7 +152,7 @@ def _seeds_grow(sx, sy, sidx):
     return out_x, out_y, out_i
 
 
-@njit(cache=True)
+@njit(cache=True, nogil=True)
 def _heap_grow(hd, hx, hy, hi):
     """Double the heap arrays, preserving contents. Rebind all four."""
     cap = hd.shape[0]
@@ -172,7 +172,7 @@ def _heap_grow(hd, hx, hy, hi):
 # Main adaptel creation (mirrors generate.c)
 # ==========================================================================
 
-@njit(cache=True)
+@njit(cache=True, nogil=True)
 def _create_adaptels(layers, n_layers, mask, cols, rows,
                      threshold, connectivity, distance_type, minkowski_p):
     """

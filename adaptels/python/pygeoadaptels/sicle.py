@@ -22,7 +22,7 @@ from .core import heap_insert, heap_extract
 #  IFT kernel — Image Foresting Transform with fmax path-cost
 # ══════════════════════════════════════════════════════════════════════
 
-@njit(cache=True)
+@njit(cache=True, nogil=True)
 def _heap_grow(h_dist, h_x, h_y, h_idx):
     """Double the heap arrays, preserving their contents.
 
@@ -40,7 +40,7 @@ def _heap_grow(h_dist, h_x, h_y, h_idx):
         n_idx[i] = h_idx[i]
     return n_dist, n_x, n_y, n_idx
 
-@njit(cache=True)
+@njit(cache=True, nogil=True)
 def _ift_fmax(layers, n_layers, mask, cols, rows, seeds, n_seeds,
               labels_out, cost_out):
     """
@@ -152,7 +152,7 @@ def _ift_fmax(layers, n_layers, mask, cols, rows, seeds, n_seeds,
 #  Seed relevance — Vsc (size × min contrast with neighbors)
 # ══════════════════════════════════════════════════════════════════════
 
-@njit(cache=True)
+@njit(cache=True, nogil=True)
 def _compute_seed_relevance(layers, n_layers, labels, mask,
                             cols, rows, n_seeds, saliency, use_saliency):
     """
