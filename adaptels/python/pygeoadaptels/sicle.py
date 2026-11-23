@@ -484,8 +484,9 @@ def sicle_from_array(data, mask=None, n_segments=200,
         a single 8-connected region. Do not pass these to
         enforce_connectivity(): it tests
         4-connectivity, which is the adaptels grower's default
-        neighbourhood, and it will split each SICLE superpixel into
-        roughly twenty pieces that were never disconnected.
+        neighbourhood, and it will split about half of the SICLE
+        superpixels into pieces that were never disconnected (on the
+        test raster 111 of 200, into 721; ``examples/readme_numbers.py``).
     n_superpixels : int
         Number of superpixels produced.
 

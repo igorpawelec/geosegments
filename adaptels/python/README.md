@@ -196,6 +196,8 @@ Every connected component becomes its own adaptel, so the count rises by about 1
 
 Labels are 0-based and `-1` outside the mask; `create_sicle` writes that `-1` as the file's nodata value.
 
+**Labels.** Both methods number their regions from 0 to *n* − 1, and mark the pixels outside the mask with `-9999` (adaptels) or `-1` (SICLE): on the test file, ids 0 to 2791 from `create_adaptels` at threshold 60 and 0 to 199 from `create_sicle` at 200 segments, around the same 34,386 pixels outside the plot. A SICLE superpixel is one piece under 8-connectivity, the neighbourhood it grows in, but can be several under 4-connectivity, because its pixels may touch only at corners: on the 400 × 400 px raster read as a plain array, 200 superpixels are 200 pieces under 8-connectivity and 721 under 4-connectivity, 111 of them split. `enforce_connectivity` tests 4-connectivity, the neighbourhood `vectorize_from_file` polygonises in by default, and makes each of those 721 pieces a superpixel of its own (numbers from `python examples/readme_numbers.py`).
+
 <details>
 <summary><b>Performance, repository layout, requirements, testing</b></summary>
 
